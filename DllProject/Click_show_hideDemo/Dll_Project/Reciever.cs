@@ -36,11 +36,19 @@ namespace Dll_Project
         }
         public override void OnEnable()
         {
-            MessageDispatcher.AddListener(WsMessageType.RecieveCChangeObj.ToString(), MessageRcv); 
+            MessageDispatcher.AddListener(WsMessageType.RecieveCChangeObj.ToString(), MessageRcv);
+            //MessageDispatcher.AddListener(WsMessageType.SendCChangeObj.ToString(), SendCChangeObj);
         }
         public override void OnDisable()
         {
             MessageDispatcher.RemoveListener(WsMessageType.RecieveCChangeObj.ToString(), MessageRcv);
+            //MessageDispatcher.RemoveListener(WsMessageType.SendCChangeObj.ToString(), SendCChangeObj);
+        }
+        void SendCChangeObj(IMessage msg)
+        {
+            WsChangeInfo changeInfo = msg.Data as WsChangeInfo;
+
+            MessageDispatcher.SendMessageData(WsMessageType.RecieveChangeObj.ToString(), changeInfo, 0);
 
         }
         void MessageRcv(IMessage m)
@@ -54,10 +62,9 @@ namespace Dll_Project
                     break;
                 case "SelectHorse":
                     Debug.LogError("selected");
-                    
                     HosrseInfo _in = JsonMapper.ToObject<HosrseInfo>(ms.b);
-                    //Debug.Log (HorseController._i.HorsesInfo[ _in.index].selcted);
                     HorseController._i.HorsesInfo[_in.index] = _in;
+
                     if (_in.user_id != mStaticThings.I.mAvatarID)
                     {
                         HorseController._i.Horses[_in.index].GetChild(3).GetChild(0).GetChild(1).gameObject.SetActive(false);
@@ -71,16 +78,16 @@ namespace Dll_Project
                     break;
                 case "StartGame":
                     HorseController._i.HostUID = ms.b;
-                    HorseController._i._canvas.GetChild(0).Find("StartBtn").gameObject.SetActive(false);
+                    HorseController._i._canvas.GetChild(0).GetChild(1).gameObject.SetActive(false);
                     HorseController._i.StartGame();
-
                     break;
                 case "AddSpeed":
                     Debug.Log("addspeed");
-                    if (mStaticThings.I.mAvatarID == ms.c)
+                    if (mStaticThings.I.mAvatarID == HorseController._i.HostUID)
                     {
-                        Transform HorseObj = HorseController._i.Horses[int.Parse(ms.d)];
-                        
+                        Transform HorseObj = HorseController._i.Horses[int.Parse(ms.c)];
+
+                        // change next letter on UI
                         HorseObj.transform.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = ms.b;
                         HorseObj.Translate(Vector3.forward * 2);
 
@@ -96,11 +103,11 @@ namespace Dll_Project
 
                         };
                         MessageDispatcher.SendMessageData(WsMessageType.SendMovingObj.ToString(), inff);
-                        Debug.Log("Control Obj Sent!");
+                       
                         int temp = IsGameOver(HorseController._i.HorsesInfo);
                         if (temp != 0)
                         {
-                            WsCChangeInfo w = new WsCChangeInfo() 
+                            WsCChangeInfo w = new WsCChangeInfo()
                             {
                                 a = "GameOver",
                                 b = temp.ToString(),
@@ -108,11 +115,7 @@ namespace Dll_Project
                             MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), w);
                         }
                     }
-
-                   
-
                     break;
-
                 case "GameOver":
                     GameObject winner_horse = HorseController._i.Horses[int.Parse(ms.b)].gameObject;
                     winner_horse.transform.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "Winner";
