@@ -10,13 +10,12 @@ using System;
 using TMPro.Examples;
 using LitJson;
 
-public class HosrseInfo
+public class HorseInfo
 {
-    public string user_id;
-    public int index;
-    public float PosX, PosY, PosZ;
+    public string user_id { get; set; }
     public bool selcted= false;
     public int NoOfUsers;
+    public int index;
     public float speed = 0;
     public string req_inpt;
 }
@@ -24,296 +23,166 @@ public class HosrseInfo
 
 namespace Dll_Project
 {
-    public class HorseController : DllGenerateBase 
+    public class HorseController : DllGenerateBase
     {
-        public GameObject Table;
-        public GameObject HorsesParent;
+        // Objects From Scene
+        public Canvas MainCanvas;
+        public Transform table;
+
+        // List Of Horse Objects
         public List<Transform> Horses = new List<Transform>();
-        public List<HosrseInfo> HorsesInfo = new List<HosrseInfo>();
-        public Transform _canvas;
-        public static HorseController _i;
 
-        
-        bool Btnpressed =false;
-        public bool GameStarted = false;
-        public int NoOfHorseActive;
-        public string req_inpt;
-        public int active_horses=0;
-
-        
-
-        public string HostUID;
-
-        
+        // Store Horse Information
+        public List<HorseInfo> _horsesInfo = new List<HorseInfo>();
+        public string HostID = "";
+        public bool ButtonPressed, GameStarted = false;
+        public string req_inpt = string.Empty;
+        public static HorseController _i;        
         public override void Init()
         {
-            if (mStaticThings.I.isVRApp) { return; }
-           
-            Table = BaseMono.ExtralDatas[0].Target.gameObject;
-            HorsesParent = Table.transform.GetChild(0).gameObject;
-            _canvas = BaseMono.ExtralDatas[1].Target.transform;
-            
-            
+            table = BaseMono.ExtralDatas[0].Target.transform;
+            MainCanvas = BaseMono.ExtralDatas[1].Target.GetComponent<Canvas>();
             Debug.Log("HorseController Init !");
-            for(int i =0; i< HorsesParent.GetComponentInChildren<Transform>().childCount; i++)
-            {
-                Transform _h = Table.transform.GetChild(0).GetChild(i);
-                Horses.Add(_h);
-                HosrseInfo _info = new HosrseInfo()
-                {
-                    index = _h.GetSiblingIndex(),
-                    PosX = _h.localPosition.x,
-                    PosY = _h.localPosition.y,
-                    PosZ = _h.localPosition.z,                    
-                    speed = 0,
-                    user_id = "",
-                    selcted = false,
-
-                };
-                HorsesInfo.Add(_info);
-                
-            }
-            MessageDispatcher.AddListener(VrDispMessageType.RoomConnected.ToString(), (msg)=> 
-            {
-                WsCChangeInfo ws = new WsCChangeInfo()
-                {
-                    a = "RoomConnected",
-                    b = mStaticThings.I.mAvatarID,
-                };
-                MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ws);
-
-            });
-            
-            
-            
-
         }
-        
+
         public override void Awake()
         {
             Debug.Log("HorseController Awake !");
-            MessageDispatcher.AddListener(VRPointObjEventType.VRPointClick.ToString(), Clicked);
+            if (mStaticThings.I != null)
+            {
+                RoomConnect();
+            }
         }
-
+        void RoomConnect()
+        {
+            WsCChangeInfo wsCChangeInfo = new WsCChangeInfo 
+            {
+                a = "RoomConnected",
+                b = HostID,
+            };
+            MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), wsCChangeInfo); 
+        }
         public override void Start()
         {
-        
+            for (int i = 0; i < table.GetChild(0).childCount; i++)
+            {
+               
+                HorseInfo _in = new HorseInfo
+                {
+                    index  = i,
+                    user_id = "",
+                    selcted = false,
+                    NoOfUsers = 0,
+                    speed = 0,
+                    req_inpt = "",
+                };
+                Horses.Add(table.GetChild(0).GetChild(i));
+                _horsesInfo.Add(_in);
+
+            }
+
+            foreach (Transform i in Horses) { Debug.LogError(i.name); }
+
+
             _i = this;
             Debug.Log("HorseController Start !");
         }
-        void SendCChangeObj(IMessage msg)
-        {
-            WsChangeInfo changeInfo = msg.Data as WsChangeInfo;
 
-            MessageDispatcher.SendMessageData(WsMessageType.RecieveChangeObj.ToString(), changeInfo, 0);
-
-        }
         public override void OnEnable()
         {
             Debug.Log("HorseController OnEnable !");
             MessageDispatcher.AddListener(VRPointObjEventType.VRPointClick.ToString(), Clicked);
-            //MessageDispatcher.AddListener(WsMessageType.SendCChangeObj.ToString(), SendCChangeObj);
         }
-       
+
         public override void OnDisable()
         {
             Debug.Log("HorseController OnDisable !");
             MessageDispatcher.RemoveListener(VRPointObjEventType.VRPointClick.ToString(), Clicked);
-            //MessageDispatcher.RemoveListener(WsMessageType.SendCChangeObj.ToString(), SendCChangeObj);
-
-
         }
         IEnumerator Wait(int r)
         {
             yield return new WaitForSeconds(r);
         }
 
-        
+
         void Clicked(IMessage msg)
         {
-           
             GameObject Obj = msg.Data as GameObject;
             Debug.Log((Obj.name).Split('_')[0]);
-            switch ( (Obj.name).Split('_')[0])
+            switch ((Obj.name).Split('_')[0])
             {
                 case "Button":
+                    int car_index = int.Parse((Obj.name).Split('_')[1]);
                     
-                    int indexx = int.Parse((msg.Data as GameObject).name.Split('_')[1]);
-                    
-                    Button c = Obj.GetComponent<Button>();
-                    c.transform.GetChild(0).GetComponent<Text>().text = "OK";
-                    
-                    if (HorsesInfo[indexx].user_id == "") { active_horses += 1; }
-                    foreach(Transform _t in Horses)
+                    WsCChangeInfo _info = new WsCChangeInfo() 
                     {
-                        _t.GetChild(3).gameObject.SetActive(false);
-                    }
-                    Horses[indexx].GetChild(3).gameObject.SetActive(true);
-
-                    HosrseInfo _info = new HosrseInfo()
-                    {
-                        index = indexx,
-                        speed = 0,
-                        user_id = mStaticThings.I.mAvatarID,
-                        selcted = true,
-                        PosX = 0,
-                        PosY = 0,
-                        PosZ = 0,
-                        NoOfUsers = 0,
-                        req_inpt = "",
-                        
-                        
+                        a = "Select Horse",
+                        b = car_index.ToString(),
+                        c = mStaticThings.I.mAvatarID,
                     };
-
-                    
-                    _info.NoOfUsers += 1;
-                    string s = JsonMapper.ToJson(_info);
-
-                    WsCChangeInfo _infoo = new WsCChangeInfo()
-                    {
-                        a = "SelectHorse",
-                        b = s,                        
-                        
-                        c = active_horses.ToString(),
-                      };
-                      MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString() , _infoo);                    
+                    MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(),_info);
                     break;
                 case "StartGame":
-                    Obj.SetActive(false);
-                    HostUID = mStaticThings.I.mAvatarID;
-                    WsCChangeInfo im = new WsCChangeInfo()
+                    WsCChangeInfo info = new WsCChangeInfo
                     {
                         a = "StartGame",
-                        b = HostUID,
-
+                        b = mStaticThings.I.mAvatarID,
                     };
-                    MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), im);
+                    MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), info);
+                    
                     break;
-                default:break;
+                default: break;
             }
-        }
 
-        public float speed = 0.01f;
-        public override void LateUpdate()
+            Wait(1);
+        }
+        public override void Update()
         {
             if (GameStarted)
             {
-                foreach(Transform _t in Horses)
-                { 
-                    _t.GetChild(3).GetChild(0).GetChild(2).GetComponent<Text>().text = "speed = " + speed.ToString();
-                    if (mStaticThings.I.mAvatarID == HostUID)
+                if (Input.inputString == req_inpt) { 
+                    ButtonPressed = true;
+                    foreach (HorseInfo i in _horsesInfo)
                     {
-                        WsMovingObj m = new WsMovingObj()
+                        if (i.user_id == mStaticThings.I.mAvatarID)
                         {
-                            id = mStaticThings.I.mAvatarID,
-                            name = _t.name,
-                            mark = "i",
-                            position = _t.transform.localPosition,
-                            islocal = true,
-                            rotation = _t.transform.rotation,
-                            scale = _t.transform.localScale,
-                        };
-                        MessageDispatcher.SendMessageData(WsMessageType.SendMovingObj.ToString(), m);
-                    }
-
-                }
-                Rand();
-                Debug.LogError(req_inpt);               
-                if (req_inpt == Input.inputString)
-                {
-                    Btnpressed = true;
-                    Rand();
-                    foreach (HosrseInfo _h in HorsesInfo)
-                    {
-                        if (mStaticThings.I.mAvatarID == _h.user_id)
-                        {
-                            
-                            WsCChangeInfo ws = new WsCChangeInfo()
+                            Rand(Horses[i.index].gameObject, i);
+                            WsCChangeInfo o = new WsCChangeInfo
                             {
                                 a = "AddSpeed",
-                                b = req_inpt,                                
-                                c = _h.index.ToString(),
-
-
+                                b = i.index.ToString(),
                             };
-                            MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ws);
+                            MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), o);
+                            //
                         }
                     }
-                   
-
                 }
-
+               
             }
-
         }
-       
+
         public override void OnTriggerEnter(Collider other)
         {
             Debug.LogWarning(other);
         }
-       
-        public void Rand()
+
+        public void Rand(GameObject _horse, HorseInfo _horseInfo)
         {
             char lt = new char();
             string s = "";
-            if (!Btnpressed)
-                return;
+          
             //if (Btnpressed)
             {
                 System.Random rnd = new System.Random();
                 lt = (char)rnd.Next('a', 'z');
                 s = lt.ToString();
-                Btnpressed = false;
-                
-                
+                ButtonPressed = false;
+
+
             }
+            _horse.transform.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = s;
+            _horseInfo.req_inpt = s;
             req_inpt = s;
-            foreach (var go in Horses)
-            {
-                go.gameObject.transform.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = req_inpt;
-            }
-        }
-
-        public void AllowStartGame()
-        {
-            Debug.Log("alllllow");
-            Button b = _canvas.transform.GetChild(0).GetChild(1).GetComponent<Button>();
-            b.gameObject.SetActive(true);
-            
-            
-        }
-        public void StartGame()
-        {
-            
-            Debug.Log("starting");
-            
-            for (int i = 0; i < Horses.Count; i++)
-            {
-                if (!HorsesInfo[i].selcted)
-                {
-
-                    Horses[i].gameObject.SetActive(false);
-                    Horses[i].GetChild(3).GetChild(0).GetChild(1).gameObject.SetActive(false);
-
-                }
-                else
-                {
-                    Horses[i].GetChild(3).GetChild(0).GetChild(1).gameObject.SetActive(false);
-                    Horses[i].gameObject.SetActive(true);
-                    
-                    Horses[i].transform.GetChild(3).GetChild(0).GetChild(3).gameObject.SetActive(true);
-                    Horses[i].gameObject.SetActive(true);
-                    
-                    
-
-                    Rand();
-                    
-                }
-            }
-                
-            GameStarted = true;
-            Btnpressed = true;
-            
         }
     }
 }

@@ -4616,7 +4616,7 @@ PrefabInstance:
     - target: {fileID: 1024377603193894480, guid: 8ac655e4fc965b44d83f166142d1567d,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -8.07
+      value: 17.26
       objectReference: {fileID: 0}
     - target: {fileID: 1024377603193894480, guid: 8ac655e4fc965b44d83f166142d1567d,
         type: 3}
@@ -4667,6 +4667,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: HrsPrefab (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1024377603193894481, guid: 8ac655e4fc965b44d83f166142d1567d,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1024377604175891982, guid: 8ac655e4fc965b44d83f166142d1567d,
         type: 3}
@@ -16243,7 +16248,7 @@ GameObject:
   m_Component:
   - component: {fileID: 810596662}
   - component: {fileID: 810596661}
-  - component: {fileID: 810596663}
+  - component: {fileID: 810596660}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -16251,6 +16256,25 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &810596660
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 810596659}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HorizontalAxis: Horizontal
+  m_VerticalAxis: Vertical
+  m_SubmitButton: Submit
+  m_CancelButton: Cancel
+  m_InputActionsPerSecond: 10
+  m_RepeatDelay: 0.5
+  m_ForceModuleActive: 0
 --- !u!114 &810596661
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16280,18 +16304,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &810596663
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 810596659}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 01614664b831546d2ae94a42149d80ac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &821060263
 GameObject:
   m_ObjectHideFlags: 0
@@ -17029,7 +17041,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   previewOnGUI: 1
   enableGUILayout: 1
-  drawStateLabels: 1
+  drawStateLabels: 0
   enableStateLabelsInBuilds: 0
   GUITextureStateLabels: 0
   GUITextStateLabels: 0
@@ -19597,7 +19609,7 @@ PrefabInstance:
     - target: {fileID: 1024377603193894480, guid: 8ac655e4fc965b44d83f166142d1567d,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 17.88
+      value: 9.57
       objectReference: {fileID: 0}
     - target: {fileID: 1024377603193894480, guid: 8ac655e4fc965b44d83f166142d1567d,
         type: 3}
@@ -24541,7 +24553,7 @@ PrefabInstance:
     - target: {fileID: 1024377603193894480, guid: 8ac655e4fc965b44d83f166142d1567d,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 9.81
+      value: -8.17
       objectReference: {fileID: 0}
     - target: {fileID: 1024377603193894480, guid: 8ac655e4fc965b44d83f166142d1567d,
         type: 3}
@@ -27775,7 +27787,7 @@ PrefabInstance:
     - target: {fileID: 2053228433798176726, guid: 27cebf0e1d38acd4aabc57aeb198e533,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -3.79
       objectReference: {fileID: 0}
     - target: {fileID: 2053228433798176726, guid: 27cebf0e1d38acd4aabc57aeb198e533,
         type: 3}
@@ -27785,7 +27797,7 @@ PrefabInstance:
     - target: {fileID: 2053228433798176726, guid: 27cebf0e1d38acd4aabc57aeb198e533,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 5
+      value: -1.98
       objectReference: {fileID: 0}
     - target: {fileID: 2053228433798176726, guid: 27cebf0e1d38acd4aabc57aeb198e533,
         type: 3}
@@ -27821,6 +27833,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2053228434538612305, guid: 27cebf0e1d38acd4aabc57aeb198e533,
+        type: 3}
+      propertyPath: now_UnityVersion
+      value: 2019.4.30
       objectReference: {fileID: 0}
     - target: {fileID: 3203630411695162498, guid: 27cebf0e1d38acd4aabc57aeb198e533,
         type: 3}
@@ -33426,6 +33443,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: StartBtn
       objectReference: {fileID: 0}
+    - target: {fileID: 1249072784, guid: f83af3fdfb4270f439e2278ef22abb22, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1400994371, guid: f83af3fdfb4270f439e2278ef22abb22, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1400994372, guid: f83af3fdfb4270f439e2278ef22abb22, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 38.100006
@@ -33608,7 +33633,7 @@ PrefabInstance:
     - target: {fileID: 8831023488289042250, guid: f83af3fdfb4270f439e2278ef22abb22,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8831023488614547100, guid: f83af3fdfb4270f439e2278ef22abb22,
         type: 3}
@@ -33628,7 +33653,7 @@ PrefabInstance:
     - target: {fileID: 8831023488614547104, guid: f83af3fdfb4270f439e2278ef22abb22,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8831023488614547105, guid: f83af3fdfb4270f439e2278ef22abb22,
         type: 3}
