@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using LitJson;
 
 namespace Dll_Project
 {
@@ -44,8 +45,38 @@ namespace Dll_Project
             WsCChangeInfo ms = m.Data as WsCChangeInfo;
             switch (ms.a)
             { 
-                case "RoomConnected":                  
-                    HorseController._i.HostID = ms.b == "" ? "" : ms.b;                               
+                case "RoomConnected": 
+                    if (mStaticThings.I.mAvatarID != ms.b) { return; }
+
+                    NewUserInfo _info = JsonMapper.ToObject<NewUserInfo>(ms.a);
+
+                    HorseController._i._horsesInfo = _info.__horseinfo;
+                    HorseController._i.GameStarted = _info._gameStarted;
+                    HorseController._i.HostID = _info._hostID == "" ? "" : _info._hostID;
+
+                    foreach(HorseInfo _i in HorseController._i._horsesInfo)
+                    {
+                        if (_i.selcted)
+                        {
+                            HorseController._i.Horses[_i.index].GetChild(3).GetChild(0).GetChild(1).gameObject.SetActive(false);
+                            HorseController._i.Horses[_i.index].GetChild(3).GetChild(0).GetChild(3).gameObject.SetActive(true);
+                            HorseController._i.Horses[_i.index].GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "备好了"; //ready
+                            
+                            if (HorseController._i.GameStarted)
+                            {
+                                _i.speed = 0.1f;
+                                HorseController._i.Horses[_i.index].GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "当前播放";//playing
+                               
+                            }
+                        }
+                        else
+                        {
+                            if (HorseController._i.GameStarted)
+                            {
+                                HorseController._i.Horses[_i.index].gameObject.SetActive(false);
+                            }
+                        }
+                    }
                     break;
                 case "Select Horse":
                     int index = int.Parse(ms.b);                    
@@ -73,11 +104,20 @@ namespace Dll_Project
                     Debug.Log(ms.b);
                     StartGame();
                     break;
-                case "AddSpeed":                   
+                case "SpeedControl":                   
                     if (mStaticThings.I.mAvatarID == HorseController._i.HostID)
                     {
-                        int ind = int.Parse(ms.b);                        
-                        HorseController._i._horsesInfo[ind].speed +=0.5f;
+                        int ind = int.Parse(ms.b);
+                        switch (ms.d)
+                        {
+                            case "+":                                
+                                HorseController._i._horsesInfo[ind].speed += 0.5f;
+                                break;
+                            case "-":
+                                HorseController._i._horsesInfo[ind].speed -= 0.5f;
+                                break;
+                        }
+                        
                     }
                    
                     break;

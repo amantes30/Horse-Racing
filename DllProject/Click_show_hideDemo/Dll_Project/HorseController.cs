@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
+using LitJson;
 
 public class HorseInfo
 {
@@ -15,24 +15,31 @@ public class HorseInfo
     public string req_inpt;
 }
 
+public class NewUserInfo
+{
+    public List<HorseInfo> __horseinfo;
+    public bool ButtonPressed, _gameStarted;
+    public string _hostID = "";
+}
 
 namespace Dll_Project
 {
     public class HorseController : DllGenerateBase
     {
+        public static HorseController _i;
+
         // Objects From Scene
         public Canvas MainCanvas;
         public Transform table;
+        
+        public List<Transform> Horses = new List<Transform>();        // List Of Horse Objects
 
-        // List Of Horse Objects
-        public List<Transform> Horses = new List<Transform>();
+        public List<HorseInfo> _horsesInfo = new List<HorseInfo>();   // Store Horse Information
 
-        // Store Horse Information
-        public List<HorseInfo> _horsesInfo = new List<HorseInfo>();
-        public string HostID = "";
         public bool ButtonPressed, GameStarted = false;
         public string req_inpt = string.Empty;
-        public static HorseController _i;        
+        public string HostID = "";
+        
         public override void Init()
         {
             table = BaseMono.ExtralDatas[0].Target.transform;
@@ -42,8 +49,7 @@ namespace Dll_Project
 
         public override void Awake()
         {
-            Debug.Log("HorseController Awake !");
-            
+            Debug.Log("HorseController Awake !");            
         }      
       
         public override void Start()
@@ -101,6 +107,14 @@ namespace Dll_Project
                         {
                             MainCanvas.transform.GetChild(0).Find("Speed").gameObject.SetActive(true);
                             MainCanvas.transform.GetChild(0).Find("Speed").GetComponent<Text>().text = "Speed: " + ((int)(((i.speed)) * 100)).ToString();
+                            WsCChangeInfo o = new WsCChangeInfo
+                            {
+                                a = "SpeedControl",
+                                b = i.index.ToString(),
+                                c = i.user_id,
+                                d = "-"
+                            };
+                            MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), o);
                         }
                     }
 
@@ -188,9 +202,14 @@ namespace Dll_Project
             MainCanvas.transform.GetChild(0).GetChild(0).gameObject.SetActive(true);
             char lt = new char();
             string s = "";
-            System.Random rnd = new System.Random();
-            lt = (char)rnd.Next('a', 'z');
-            s = lt.ToString();
+            while (s=="" || s =="a" || s=="w" || s == "s" || s == "d")
+            {
+                System.Random rnd = new System.Random();
+                lt = (char)rnd.Next('a', 'z');
+                s = lt.ToString();
+            }
+            
+
             ButtonPressed = false;
             MainCanvas.transform.GetChild(0).Find("Req_Input").GetComponent<Text>().text = s.ToUpper();            
             _horseInfo.req_inpt = s;
@@ -248,9 +267,10 @@ namespace Dll_Project
                     GenerateRandomLetter(Horses[i.index].gameObject, i);
                     WsCChangeInfo o = new WsCChangeInfo
                     {
-                        a = "AddSpeed",
+                        a = "SpeedControl",
                         b = i.index.ToString(),
                         c = i.user_id,
+                        d = "+"
                     };
                     MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), o);
                     //
@@ -259,10 +279,19 @@ namespace Dll_Project
         }
         void RoomConnect()
         {
+            NewUserInfo _info = new NewUserInfo()
+            {
+                __horseinfo = _horsesInfo,
+                _gameStarted = GameStarted,
+                _hostID = HostID,
+            };
+
+            string ___info = JsonMapper.ToJson(_info);
             WsCChangeInfo wsCChangeInfo = new WsCChangeInfo
             {
                 a = "RoomConnected",
-                b = HostID,
+                b = mStaticThings.I.mAvatarID,                
+                c = ___info,
             };
             MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), wsCChangeInfo);
         }
