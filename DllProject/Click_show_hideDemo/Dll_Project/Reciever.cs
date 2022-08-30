@@ -77,7 +77,7 @@ namespace Dll_Project
                     if (mStaticThings.I.mAvatarID == HorseController._i.HostID)
                     {
                         int ind = int.Parse(ms.b);                        
-                        HorseController._i._horsesInfo[ind].speed +=0.01f;
+                        HorseController._i._horsesInfo[ind].speed +=0.5f;
                     }
                    
                     break;
@@ -102,7 +102,7 @@ namespace Dll_Project
                 {
                     Transform selectedhorse = HorseController._i.Horses[i.index];
                     HorseInfo _info = HorseController._i._horsesInfo[i.index];
-                    i.speed = 0.01f;
+                    i.speed = 0.1f;
                     selectedhorse.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "Playing";
                     HorseController._i.GenerateRandomLetter(selectedhorse.gameObject, _info);
                 }
@@ -130,6 +130,7 @@ namespace Dll_Project
                 foreach (Transform _t in HorseController._i.Horses)
                 {
                     _t.localPosition = new Vector3(_t.localPosition.x, _t.localPosition.y, 0);
+                    
                     _t.gameObject.SetActive(true);
                     _t.GetChild(3).GetChild(0).GetChild(1).gameObject.SetActive(true);
                     _t.GetChild(3).GetChild(0).GetChild(3).gameObject.SetActive(false);
@@ -138,7 +139,7 @@ namespace Dll_Project
                         id = "",
                         name = _t.name,
                         islocal = true,
-                        mark = "s",
+                        mark = "i",
                         position = _t.localPosition,
                         rotation = _t.localRotation,
                         scale = _t.localScale
@@ -147,6 +148,7 @@ namespace Dll_Project
                 }
 
             }
+            HorseController._i.HostID = "";
           
             foreach (HorseInfo _inf in HorseController._i._horsesInfo)
             {

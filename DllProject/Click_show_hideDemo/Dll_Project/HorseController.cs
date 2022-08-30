@@ -78,7 +78,7 @@ namespace Dll_Project
 
             Debug.Log("HorseController Start !");
         }
-        public override void Update()
+        public override void LateUpdate()
         {
             if (GameStarted)
             {
@@ -181,6 +181,7 @@ namespace Dll_Project
         }
         public void GenerateRandomLetter(GameObject _horse, HorseInfo _horseInfo)
         {
+            if (mStaticThings.I.mAvatarID != _horseInfo.user_id) { return; }
             char lt = new char();
             string s = "";
             System.Random rnd = new System.Random();
@@ -197,7 +198,7 @@ namespace Dll_Project
             {
                 if (_t.selcted)
                 {
-                    Horses[_t.index].Translate(Vector3.forward * _t.speed);
+                    Horses[_t.index].Translate(Vector3.forward * _t.speed * Time.deltaTime);
                     WsMovingObj _moveinfo = new WsMovingObj
                     {
                         id = _t.user_id,
@@ -221,6 +222,7 @@ namespace Dll_Project
                     {
                         a = "GameOver",
                         b = _t.index.ToString(),
+                        c=_t.user_id,
 
                     };
                     MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), msg);
