@@ -4,7 +4,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using LitJson;
-
+using UnityEngine.EventSystems;
+using UnityEngine.Events;
+using System.Collections;
+using DG.Tweening;
 public class HorseInfo
 {
     public string user_id { get; set; }
@@ -24,7 +27,7 @@ public class NewUserInfo
 
 namespace Dll_Project
 {
-    public class HorseController : DllGenerateBase
+    public class HorseController : DllGenerateBase 
     {
         public static HorseController _i;
 
@@ -73,7 +76,12 @@ namespace Dll_Project
                 _horsesInfo.Add(_in);
 
             }
-           
+
+
+            MainCanvas.transform.GetChild(0).Find("StartGame").gameObject.AddComponent<EventTrigger>();
+            AddEventTrig(EventTriggerType.PointerEnter, HoverIn);
+            AddEventTrig(EventTriggerType.PointerExit, HoverOut);
+
             MainCanvas.transform.GetChild(0).Find("StartGame").GetComponent<Button>().onClick.AddListener(() =>
             {
                 WsCChangeInfo info = new WsCChangeInfo
@@ -87,6 +95,17 @@ namespace Dll_Project
 
             Debug.Log("HorseController Start !");
         }
+        void AddEventTrig(EventTriggerType ET, UnityAction UA)
+        {
+            EventTrigger.TriggerEvent trigger = new EventTrigger.TriggerEvent();
+            trigger.AddListener((eventData) => UA()); // you can capture and pass the event data to the listener
+
+            // Create and initialise EventTrigger.Entry using the created TriggerEvent
+            EventTrigger.Entry entry = new EventTrigger.Entry() { callback = trigger, eventID = ET };
+
+            // Add the EventTrigger.Entry to delegates list on the EventTrigger
+            MainCanvas.transform.GetChild(0).Find("StartGame").gameObject.GetComponent<EventTrigger>().triggers.Add(entry);
+        }
         public override void LateUpdate()
         {
             if (GameStarted)
@@ -99,7 +118,7 @@ namespace Dll_Project
                 {
                     AddSpeed();
                 }
-                else if (Input.inputString != req_inpt)
+                else if (Input.inputString != req_inpt && Input.anyKeyDown)
                 {
                     foreach (HorseInfo i in _horsesInfo)
                     {
@@ -126,6 +145,7 @@ namespace Dll_Project
         {
             Debug.Log("HorseController OnEnable !");
             MessageDispatcher.AddListener(VRPointObjEventType.VRPointClick.ToString(), Clicked);
+            
             if (mStaticThings.I != null)
             {
                 RoomConnect();
@@ -136,11 +156,25 @@ namespace Dll_Project
         {
             Debug.Log("HorseController OnDisable !");
             MessageDispatcher.RemoveListener(VRPointObjEventType.VRPointClick.ToString(), Clicked);
+            
         }
 
         public override void OnTriggerEnter(Collider other)
         {
             Debug.LogWarning(other);
+        }
+        void HoverIn()
+        {
+            RawImage img = MainCanvas.transform.GetChild(0).Find("StartGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
+            img.transform.DOScaleX(1, 0.2f);
+            
+        }
+        void HoverOut()
+        {
+            RawImage img = MainCanvas.transform.GetChild(0).Find("StartGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
+
+            img.transform.DOScaleX(0, 0.2f);
+
         }
         void Clicked(IMessage msg)
         {
@@ -295,5 +329,7 @@ namespace Dll_Project
             };
             MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), wsCChangeInfo);
         }
+
+       
     }
 }
