@@ -56,7 +56,7 @@ namespace Dll_Project
                     // set button Off
                     selectedhorse.GetChild(3).GetChild(0).GetChild(1).gameObject.SetActive(false);
                     selectedhorse.GetChild(3).GetChild(0).GetChild(3).gameObject.SetActive(true);
-                    selectedhorse.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "Ready";
+                    selectedhorse.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "备好了"; //ready
 
                     // update horse information
                     selectedInfo.selcted = true;
@@ -103,7 +103,7 @@ namespace Dll_Project
                     Transform selectedhorse = HorseController._i.Horses[i.index];
                     HorseInfo _info = HorseController._i._horsesInfo[i.index];
                     i.speed = 0.1f;
-                    selectedhorse.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "Playing";
+                    selectedhorse.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "当前播放";//playing
                     HorseController._i.GenerateRandomLetter(selectedhorse.gameObject, _info);
                 }
                 HorseController._i.GameStarted = true;
@@ -117,11 +117,11 @@ namespace Dll_Project
             {
                 _t.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "Lost";
             }
-            HorseController._i.Horses[winner_index].GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "Winner";
+            HorseController._i.Horses[winner_index].GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "赢家"; //winner
             HorseController._i.GameStarted = false;
-            canvas.transform.GetChild(0).Find("Speed").GetComponent<Text>().text = "Speed: 0";
+            canvas.transform.GetChild(0).Find("Speed").GetComponent<Text>().text = "速度: 0";
             yield return new WaitForSeconds(2);
-            canvas.transform.GetChild(0).Find("Selected Car").GetComponent<Text>().text = "Selected Car : None";
+            canvas.transform.GetChild(0).Find("Selected Car").GetComponent<Text>().text = "选定的马：";
             canvas.transform.GetChild(0).Find("Req_Input").GetComponent<Text>().text = "";
 
             canvas.transform.GetChild(0).Find("Speed").gameObject.SetActive(false);
@@ -149,9 +149,14 @@ namespace Dll_Project
 
             }
             HorseController._i.HostID = "";
-          
+            
             foreach (HorseInfo _inf in HorseController._i._horsesInfo)
             {
+                if (_inf.selcted)
+                {
+                    HorseController._i.Horses[_inf.index].Find("HorseObj").GetChild(0).GetComponent<Animator>().SetBool("Eat_b", true);
+                    HorseController._i.Horses[_inf.index].Find("HorseObj").GetChild(0).GetComponent<Animator>().SetFloat("Speed_f", 0f);
+                }
                 _inf.NoOfUsers = 0;
                 _inf.req_inpt = "";
                 _inf.selcted = false;

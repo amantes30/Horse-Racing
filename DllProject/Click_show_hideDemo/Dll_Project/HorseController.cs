@@ -61,6 +61,9 @@ namespace Dll_Project
                 };
 
                 Horses.Add(table.GetChild(0).GetChild(i));
+                Animator _temp = table.GetChild(0).GetChild(i).Find("HorseObj").GetChild(0).GetComponent<Animator>();
+                _temp.SetInteger("Speed_f", 0);
+                _temp.SetBool("Eat_b", true);                
                 _horsesInfo.Add(_in);
 
             }
@@ -153,12 +156,12 @@ namespace Dll_Project
             }
             
             selectedHorse.GetChild(3).GetChild(0).GetChild(3).gameObject.SetActive(true);
-            selectedHorse.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "Ready";
+            selectedHorse.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "备好了";
             selectedInfo.selcted = true;
             selectedInfo.user_id = mStaticThings.I.mAvatarID;
             selectedInfo.NoOfUsers += 1;
             MainCanvas.transform.GetChild(0).Find("Selected Car").gameObject.SetActive(true);
-            MainCanvas.transform.GetChild(0).Find("Selected Car").GetComponent<Text>().text = "Selected Car: " + car_index.ToString();
+            MainCanvas.transform.GetChild(0).Find("Selected Car").GetComponent<Text>().text = "选定的马： " + car_index.ToString();
             foreach (HorseInfo i in _horsesInfo)
             {
                 if (i.selcted) { count++; }
@@ -182,6 +185,7 @@ namespace Dll_Project
         public void GenerateRandomLetter(GameObject _horse, HorseInfo _horseInfo)
         {
             if (mStaticThings.I.mAvatarID != _horseInfo.user_id) { return; }
+            MainCanvas.transform.GetChild(0).GetChild(0).gameObject.SetActive(true);
             char lt = new char();
             string s = "";
             System.Random rnd = new System.Random();
@@ -199,6 +203,8 @@ namespace Dll_Project
                 if (_t.selcted)
                 {
                     Horses[_t.index].Translate(Vector3.forward * _t.speed * Time.deltaTime);
+                    Horses[_t.index].Find("HorseObj").GetChild(0).GetComponent<Animator>().SetBool("Eat_b", false);
+                    Horses[_t.index].Find("HorseObj").GetChild(0).GetComponent<Animator>().SetFloat("Speed_f", 0.5f);
                     WsMovingObj _moveinfo = new WsMovingObj
                     {
                         id = _t.user_id,
@@ -216,7 +222,7 @@ namespace Dll_Project
                     GameStarted = false;
                     if (mStaticThings.I.mAvatarID == _t.user_id)
                     {
-                        MainCanvas.transform.GetChild(0).Find("Req_Input").GetComponent<Text>().text = "Winner";
+                        MainCanvas.transform.GetChild(0).Find("Req_Input").GetComponent<Text>().text = "赢家"; // winner
                     }
                     WsCChangeInfo msg = new WsCChangeInfo
                     {
