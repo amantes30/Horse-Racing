@@ -192,7 +192,7 @@ namespace Dll_Project
         }
     
        
-        IEnumerator SelectHorse(GameObject _obj, int _waittime)
+        public IEnumerator SelectHorse(GameObject _obj, int _waittime)
         {
 
             int car_index = int.Parse((_obj.name).Split('_')[1]);
@@ -209,11 +209,15 @@ namespace Dll_Project
             selectedInfo.selcted = true;
             selectedInfo.user_id = mStaticThings.I.mAvatarID;
             selectedInfo.NoOfUsers += 1;
-            MainCanvas.transform.GetChild(0).Find("Selected Car").gameObject.SetActive(true);
-            MainCanvas.transform.GetChild(0).Find("Selected Car").GetComponent<Text>().text = "选定的马： " + car_index.ToString();
-            MainCanvas.transform.GetChild(0).Find("Speed").gameObject.SetActive(true);
-            MainCanvas.transform.GetChild(0).Find("Speed").GetComponent<Text>().text = "速度: 0" + car_index.ToString();
-            
+
+
+            if (mStaticThings.I.mAvatarID == car_index.ToString())
+            {
+                MainCanvas.transform.GetChild(0).Find("Selected Car").gameObject.SetActive(true);
+                MainCanvas.transform.GetChild(0).Find("Selected Car").GetComponent<Text>().text = "选定的马： " + car_index.ToString();
+                MainCanvas.transform.GetChild(0).Find("Speed").gameObject.SetActive(true);
+                MainCanvas.transform.GetChild(0).Find("Speed").GetComponent<Text>().text = "速度: 0" + car_index.ToString();
+            }
             foreach (HorseInfo i in _horsesInfo)
             {
                 if (i.selcted) { count++; }

@@ -76,12 +76,13 @@ namespace Dll_Project
                         {
                             if (_i.selcted)
                             {
-                                HorseController._i.Horses[_i.index].GetChild(3).GetChild(0).GetChild(1).gameObject.SetActive(false);
-                                HorseController._i.Horses[_i.index].GetChild(3).GetChild(0).GetChild(3).gameObject.SetActive(true);
-                                HorseController._i.Horses[_i.index].GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "备好了"; //ready
+                                mStaticThings.I.StartCoroutine(HorseController._i.SelectHorse
+                                    (HorseController._i.Horses[_i.index].gameObject,2));
+                             
 
                                 if (HorseController._i.GameStarted)
                                 {
+                                    canvas.transform.GetChild(0).Find("StartGame").gameObject.SetActive(false);
                                     _i.speed = 0.1f;
                                     HorseController._i.Horses[_i.index].GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "当前播放";//playing
 
@@ -91,6 +92,7 @@ namespace Dll_Project
                             {
                                 if (HorseController._i.GameStarted)
                                 {
+                                    canvas.transform.GetChild(0).Find("StartGame").gameObject.SetActive(false);
                                     HorseController._i.Horses[_i.index].gameObject.SetActive(false);
                                 }
                             }
