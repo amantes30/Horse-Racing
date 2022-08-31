@@ -179,24 +179,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\amanu\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\000\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Unity Projects\\vswork\\horseDemo\\DllProject\\Click_show_hideDemo\\Dll_Project\\Dll_Project.csproj",
+      "projectUniqueName": "G:\\myProject\\vsvrsdk\\vsvrsdk\\DllProject\\Click_show_hideDemo\\Dll_Project\\Dll_Project.csproj",
       "projectName": "Dll_Project",
-      "projectPath": "D:\\Unity Projects\\vswork\\horseDemo\\DllProject\\Click_show_hideDemo\\Dll_Project\\Dll_Project.csproj",
-      "packagesPath": "C:\\Users\\amanu\\.nuget\\packages\\",
-      "outputPath": "D:\\Unity Projects\\vswork\\horseDemo\\DllProject\\Click_show_hideDemo\\Dll_Project\\obj\\",
+      "projectPath": "G:\\myProject\\vsvrsdk\\vsvrsdk\\DllProject\\Click_show_hideDemo\\Dll_Project\\Dll_Project.csproj",
+      "packagesPath": "C:\\Users\\000\\.nuget\\packages\\",
+      "outputPath": "G:\\myProject\\vsvrsdk\\vsvrsdk\\DllProject\\Click_show_hideDemo\\Dll_Project\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\amanu\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Users\\000\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -239,7 +234,7 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.410\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.101\\RuntimeIdentifierGraph.json"
       }
     }
   }

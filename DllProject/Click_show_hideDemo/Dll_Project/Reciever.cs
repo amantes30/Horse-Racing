@@ -14,8 +14,8 @@ namespace Dll_Project
         public override void Init()
         {
             
-            Debug.Log("Reciever Is ON"); 
-            
+            Debug.Log("Reciever Is ON");
+            MessageDispatcher.AddListener(WsMessageType.RecieveCChangeObj.ToString(), RecieveCChangeObj);
         }
         public override void Awake()
         {
@@ -30,7 +30,7 @@ namespace Dll_Project
         
         public override void OnEnable()
         {
-            MessageDispatcher.AddListener(WsMessageType.RecieveCChangeObj.ToString(), RecieveCChangeObj);           
+                   
                       
                        
         }
@@ -40,40 +40,59 @@ namespace Dll_Project
                    
         }
       
+        
         void RecieveCChangeObj(IMessage m)
         {
             WsCChangeInfo ms = m.Data as WsCChangeInfo;
             switch (ms.a)
             { 
-                case "RoomConnected": 
-                    if (mStaticThings.I.mAvatarID != ms.b) { return; }
-
-                    NewUserInfo _info = JsonMapper.ToObject<NewUserInfo>(ms.a);
-
-                    HorseController._i._horsesInfo = _info.__horseinfo;
-                    HorseController._i.GameStarted = _info._gameStarted;
-                    HorseController._i.HostID = _info._hostID == "" ? "" : _info._hostID;
-
-                    foreach(HorseInfo _i in HorseController._i._horsesInfo)
+                case "OK":
+                    Debug.Log("dfsssssssssss");
+                    if (mStaticThings.I.mAvatarID != ms.b) 
                     {
-                        if (_i.selcted)
+                        WsCChangeInfo i = new WsCChangeInfo()
                         {
-                            HorseController._i.Horses[_i.index].GetChild(3).GetChild(0).GetChild(1).gameObject.SetActive(false);
-                            HorseController._i.Horses[_i.index].GetChild(3).GetChild(0).GetChild(3).gameObject.SetActive(true);
-                            HorseController._i.Horses[_i.index].GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "备好了"; //ready
-                            
-                            if (HorseController._i.GameStarted)
+                            a = "UpdateForNewUser",
+                            b = mStaticThings.I.mAvatarID,
+                            c = ms.b,
+                            d = ms.c,
+                        };
+                        MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), i);
+                    }
+
+                    
+                    break;
+                case "UpdateForNewUser":
+
+                    if (mStaticThings.I.mAvatarID == ms.b)
+                    {
+                        NewUserInfo _info = JsonMapper.ToObject<NewUserInfo>(ms.c);
+
+                        HorseController._i._horsesInfo = _info.__horseinfo;
+                        HorseController._i.GameStarted = _info._gameStarted;
+                        HorseController._i.HostID = _info._hostID == "" ? "" : _info._hostID;
+
+                        foreach (HorseInfo _i in _info.__horseinfo)
+                        {
+                            if (_i.selcted)
                             {
-                                _i.speed = 0.1f;
-                                HorseController._i.Horses[_i.index].GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "当前播放";//playing
-                               
+                                HorseController._i.Horses[_i.index].GetChild(3).GetChild(0).GetChild(1).gameObject.SetActive(false);
+                                HorseController._i.Horses[_i.index].GetChild(3).GetChild(0).GetChild(3).gameObject.SetActive(true);
+                                HorseController._i.Horses[_i.index].GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "备好了"; //ready
+
+                                if (HorseController._i.GameStarted)
+                                {
+                                    _i.speed = 0.1f;
+                                    HorseController._i.Horses[_i.index].GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "当前播放";//playing
+
+                                }
                             }
-                        }
-                        else
-                        {
-                            if (HorseController._i.GameStarted)
+                            else
                             {
-                                HorseController._i.Horses[_i.index].gameObject.SetActive(false);
+                                if (HorseController._i.GameStarted)
+                                {
+                                    HorseController._i.Horses[_i.index].gameObject.SetActive(false);
+                                }
                             }
                         }
                     }

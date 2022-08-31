@@ -20,7 +20,7 @@ public class HorseInfo
 
 public class NewUserInfo
 {
-    public List<HorseInfo> __horseinfo;
+    public List<HorseInfo> __horseinfo = new List<HorseInfo>();
     public bool ButtonPressed, _gameStarted;
     public string _hostID = "";
 }
@@ -52,6 +52,7 @@ namespace Dll_Project
 
         public override void Awake()
         {
+            RoomConnecttt();
             Debug.Log("HorseController Awake !");            
         }      
       
@@ -126,7 +127,7 @@ namespace Dll_Project
                         {
                             MainCanvas.transform.GetChild(0).Find("Speed").gameObject.SetActive(true);
                             MainCanvas.transform.GetChild(0).Find("Speed").GetComponent<Text>().text = "Speed: " + ((int)(((i.speed)) * 100)).ToString();
-                            WsCChangeInfo o = new WsCChangeInfo
+                            /*WsCChangeInfo o = new WsCChangeInfo
                             {
                                 a = "SpeedControl",
                                 b = i.index.ToString(),
@@ -134,6 +135,7 @@ namespace Dll_Project
                                 d = "-"
                             };
                             MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), o);
+                        */
                         }
                     }
 
@@ -148,7 +150,7 @@ namespace Dll_Project
             
             if (mStaticThings.I != null)
             {
-                RoomConnect();
+                
             }
         }
 
@@ -156,9 +158,8 @@ namespace Dll_Project
         {
             Debug.Log("HorseController OnDisable !");
             MessageDispatcher.RemoveListener(VRPointObjEventType.VRPointClick.ToString(), Clicked);
-            
         }
-
+      
         public override void OnTriggerEnter(Collider other)
         {
             Debug.LogWarning(other);
@@ -210,6 +211,9 @@ namespace Dll_Project
             selectedInfo.NoOfUsers += 1;
             MainCanvas.transform.GetChild(0).Find("Selected Car").gameObject.SetActive(true);
             MainCanvas.transform.GetChild(0).Find("Selected Car").GetComponent<Text>().text = "选定的马： " + car_index.ToString();
+            MainCanvas.transform.GetChild(0).Find("Speed").gameObject.SetActive(true);
+            MainCanvas.transform.GetChild(0).Find("Speed").GetComponent<Text>().text = "速度: 0" + car_index.ToString();
+            
             foreach (HorseInfo i in _horsesInfo)
             {
                 if (i.selcted) { count++; }
@@ -311,23 +315,23 @@ namespace Dll_Project
                 }
             }
         }
-        void RoomConnect()
+        void RoomConnecttt()
         {
             NewUserInfo _info = new NewUserInfo()
             {
-                __horseinfo = _horsesInfo,
+                __horseinfo = this._horsesInfo,
                 _gameStarted = GameStarted,
                 _hostID = HostID,
             };
 
             string ___info = JsonMapper.ToJson(_info);
-            WsCChangeInfo wsCChangeInfo = new WsCChangeInfo
+            WsCChangeInfo y = new WsCChangeInfo
             {
-                a = "RoomConnected",
+                a = "OK",
                 b = mStaticThings.I.mAvatarID,                
-                c = ___info,
+                c = ___info
             };
-            MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), wsCChangeInfo);
+            MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(),y);
         }
 
        
