@@ -30,9 +30,37 @@ namespace Dll_Project
         
         public override void OnEnable()
         {
-                   
-                      
-                       
+
+
+
+        }
+        void DeselectHorse(mStaticThings user)
+        {
+            foreach (HorseInfo i in HorseController._i._horsesInfo)
+            {
+                if (!i.selcted)
+                {
+                   HorseController._i.Horses[i.index].GetChild(1).GetChild(0).GetChild(1).gameObject.SetActive(true);
+                    
+                }
+                if (user.mAvatarID == i.user_id && !HorseController._i.GameStarted)
+                {
+                    Transform myHorse = HorseController._i.Horses[i.index];
+                    myHorse.GetChild(1).GetChild(0).GetChild(1).gameObject.SetActive(true);
+                    
+                    
+                    myHorse.GetChild(1).GetChild(0).GetChild(3).gameObject.SetActive(false);
+                    myHorse.GetChild(1).GetChild(0).GetChild(3).GetComponent<Text>().text = "备好了";
+                    i.selcted = false;
+                    i.user_id = "";
+                    i.NoOfUsers -= 1;
+
+                    canvas.transform.GetChild(0).Find("Selected Car").gameObject.SetActive(true);
+                    canvas.transform.GetChild(0).Find("Selected Car").GetComponent<Text>().text = "选定的马： ";
+                    canvas.transform.GetChild(0).Find("Speed").gameObject.SetActive(true);
+                    canvas.transform.GetChild(0).Find("Speed").GetComponent<Text>().text = "速度: 0";
+                }
+            }
         }
         public override void OnDisable()
         {
@@ -64,9 +92,9 @@ namespace Dll_Project
                     break;
                 case "UpdateForNewUser":
 
-                    if (mStaticThings.I.mAvatarID == ms.b)
+                    if (mStaticThings.I.mAvatarID == ms.c)
                     {
-                        NewUserInfo _info = JsonMapper.ToObject<NewUserInfo>(ms.c);
+                        NewUserInfo _info = JsonMapper.ToObject<NewUserInfo>(ms.d);
 
                         HorseController._i._horsesInfo = _info.__horseinfo;
                         HorseController._i.GameStarted = _info._gameStarted;
@@ -84,7 +112,7 @@ namespace Dll_Project
                                 {
                                     canvas.transform.GetChild(0).Find("StartGame").gameObject.SetActive(false);
                                     _i.speed = 0.1f;
-                                    HorseController._i.Horses[_i.index].GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "当前播放";//playing
+                                    HorseController._i.Horses[_i.index].GetChild(1).GetChild(0).GetChild(3).GetComponent<Text>().text = "当前播放";//playing
 
                                 }
                             }
@@ -106,9 +134,9 @@ namespace Dll_Project
                     HorseInfo selectedInfo = HorseController._i._horsesInfo[index];
 
                     // set button Off
-                    selectedhorse.GetChild(3).GetChild(0).GetChild(1).gameObject.SetActive(false);
-                    selectedhorse.GetChild(3).GetChild(0).GetChild(3).gameObject.SetActive(true);
-                    selectedhorse.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "备好了"; //ready
+                    selectedhorse.GetChild(1).GetChild(0).GetChild(1).gameObject.SetActive(false);
+                    selectedhorse.GetChild(1).GetChild(0).GetChild(3).gameObject.SetActive(true);
+                    selectedhorse.GetChild(1).GetChild(0).GetChild(3).GetComponent<Text>().text = "备好了"; //ready
 
                     // update horse information
                     selectedInfo.selcted = true;
@@ -116,6 +144,12 @@ namespace Dll_Project
                     selectedInfo.NoOfUsers += 1;  
                    
                     Debug.Log("select Message");
+                    break;
+                case "DeselectHorse":
+                    if (mStaticThings.I.mAvatarID == ms.b)
+                    {
+                        DeselectHorse(mStaticThings.I);
+                    }
                     break;
                 case "StartGame":
                     /// turn OFF startGame btn
@@ -164,7 +198,7 @@ namespace Dll_Project
                     Transform selectedhorse = HorseController._i.Horses[i.index];
                     HorseInfo _info = HorseController._i._horsesInfo[i.index];
                     i.speed = 0.1f;
-                    selectedhorse.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "当前播放";//playing
+                    selectedhorse.GetChild(1).GetChild(0).GetChild(3).GetComponent<Text>().text = "当前播放";//playing
                     HorseController._i.GenerateRandomLetter(selectedhorse.gameObject, _info);
                 }
                 HorseController._i.GameStarted = true;
@@ -176,9 +210,9 @@ namespace Dll_Project
         {
             foreach(Transform _t in HorseController._i.Horses)
             {
-                _t.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "Lost";
+                _t.GetChild(1).GetChild(0).GetChild(3).GetComponent<Text>().text = "Lost";
             }
-            HorseController._i.Horses[winner_index].GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "赢家"; //winner
+            HorseController._i.Horses[winner_index].GetChild(1).GetChild(0).GetChild(3).GetComponent<Text>().text = "赢家"; //winner
             HorseController._i.GameStarted = false;
             canvas.transform.GetChild(0).Find("Speed").GetComponent<Text>().text = "速度: 0";
             yield return new WaitForSeconds(2);
@@ -193,8 +227,8 @@ namespace Dll_Project
                     _t.localPosition = new Vector3(_t.localPosition.x, _t.localPosition.y, 0);
                     
                     _t.gameObject.SetActive(true);
-                    _t.GetChild(3).GetChild(0).GetChild(1).gameObject.SetActive(true);
-                    _t.GetChild(3).GetChild(0).GetChild(3).gameObject.SetActive(false);
+                    _t.GetChild(1).GetChild(0).GetChild(1).gameObject.SetActive(true);
+                    _t.GetChild(1).GetChild(0).GetChild(3).gameObject.SetActive(false);
                     WsMovingObj m = new WsMovingObj
                     {
                         id = "",

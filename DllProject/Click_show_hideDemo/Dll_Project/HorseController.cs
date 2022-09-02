@@ -39,7 +39,7 @@ namespace Dll_Project
 
         public List<HorseInfo> _horsesInfo = new List<HorseInfo>();   // Store Horse Information
 
-        public bool ButtonPressed, GameStarted = false;
+        public bool ButtonPressed, GameStarted, horse_selected = false;
         public string req_inpt = string.Empty;
         public string HostID = "";
         
@@ -52,7 +52,7 @@ namespace Dll_Project
 
         public override void Awake()
         {
-            RoomConnecttt();
+            
             Debug.Log("HorseController Awake !");            
         }      
       
@@ -80,8 +80,16 @@ namespace Dll_Project
 
 
             MainCanvas.transform.GetChild(0).Find("StartGame").gameObject.AddComponent<EventTrigger>();
-            AddEventTrig(EventTriggerType.PointerEnter, HoverIn);
-            AddEventTrig(EventTriggerType.PointerExit, HoverOut);
+            AddEventTrig(EventTriggerType.PointerEnter, ()=> 
+            {
+                RawImage img = MainCanvas.transform.GetChild(0).Find("StartGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
+                img.transform.DOScaleX(1, 0.2f);
+            });
+            AddEventTrig(EventTriggerType.PointerExit, () => 
+            {
+                RawImage img = MainCanvas.transform.GetChild(0).Find("StartGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
+                img.transform.DOScaleX(0, 0.2f);
+            });
 
             MainCanvas.transform.GetChild(0).Find("StartGame").GetComponent<Button>().onClick.AddListener(() =>
             {
@@ -93,7 +101,7 @@ namespace Dll_Project
                 MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), info);
             });
             _i = this;
-
+            RoomConnecttt();
             Debug.Log("HorseController Start !");
         }
         void AddEventTrig(EventTriggerType ET, UnityAction UA)
@@ -109,6 +117,7 @@ namespace Dll_Project
         }
         public override void LateUpdate()
         {
+           
             if (GameStarted)
             {
                 if (mStaticThings.I.mAvatarID == HostID)
@@ -119,39 +128,32 @@ namespace Dll_Project
                 {
                     AddSpeed();
                 }
-                else if (Input.inputString != req_inpt && Input.anyKeyDown)
-                {
-                    foreach (HorseInfo i in _horsesInfo)
+                foreach (HorseInfo i in _horsesInfo)
                     {
                         if (i.user_id == mStaticThings.I.mAvatarID)
                         {
                             MainCanvas.transform.GetChild(0).Find("Speed").gameObject.SetActive(true);
                             MainCanvas.transform.GetChild(0).Find("Speed").GetComponent<Text>().text = "Speed: " + ((int)(((i.speed)) * 100)).ToString();
-                            /*WsCChangeInfo o = new WsCChangeInfo
-                            {
-                                a = "SpeedControl",
-                                b = i.index.ToString(),
-                                c = i.user_id,
-                                d = "-"
-                            };
-                            MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), o);
-                        */
+                          
                         }
-                    }
-
                 }
-
+            }
+            else if (horse_selected && Input.GetKeyDown(KeyCode.Escape))
+            {
+                horse_selected = false;
+                WsCChangeInfo c = new WsCChangeInfo
+                {
+                    a = "DeselectHorse",
+                    b = mStaticThings.I.mAvatarID
+                };
+                MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), c);
             }
         }
         public override void OnEnable()
         {
             Debug.Log("HorseController OnEnable !");
             MessageDispatcher.AddListener(VRPointObjEventType.VRPointClick.ToString(), Clicked);
-            
-            if (mStaticThings.I != null)
-            {
-                
-            }
+           
         }
 
         public override void OnDisable()
@@ -164,19 +166,7 @@ namespace Dll_Project
         {
             Debug.LogWarning(other);
         }
-        void HoverIn()
-        {
-            RawImage img = MainCanvas.transform.GetChild(0).Find("StartGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
-            img.transform.DOScaleX(1, 0.2f);
-            
-        }
-        void HoverOut()
-        {
-            RawImage img = MainCanvas.transform.GetChild(0).Find("StartGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
-
-            img.transform.DOScaleX(0, 0.2f);
-
-        }
+       
         void Clicked(IMessage msg)
         {
             GameObject Obj = msg.Data as GameObject;
@@ -201,17 +191,17 @@ namespace Dll_Project
             HorseInfo selectedInfo = _horsesInfo[car_index];
             foreach (Transform t in Horses)
             {
-                t.GetChild(3).GetChild(0).GetChild(1).gameObject.SetActive(false);
+                t.GetChild(1).GetChild(0).GetChild(1).gameObject.SetActive(false);
             }
             
-            selectedHorse.GetChild(3).GetChild(0).GetChild(3).gameObject.SetActive(true);
-            selectedHorse.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "备好了";
+            selectedHorse.GetChild(1).GetChild(0).GetChild(3).gameObject.SetActive(true);
+            selectedHorse.GetChild(1).GetChild(0).GetChild(3).GetComponent<Text>().text = "备好了";
             selectedInfo.selcted = true;
             selectedInfo.user_id = mStaticThings.I.mAvatarID;
             selectedInfo.NoOfUsers += 1;
 
 
-            if (mStaticThings.I.mAvatarID == car_index.ToString())
+            if (mStaticThings.I.mAvatarID == _horsesInfo[car_index].user_id.ToString())
             {
                 MainCanvas.transform.GetChild(0).Find("Selected Car").gameObject.SetActive(true);
                 MainCanvas.transform.GetChild(0).Find("Selected Car").GetComponent<Text>().text = "选定的马： " + car_index.ToString();
@@ -235,7 +225,7 @@ namespace Dll_Project
                 d = count.ToString(),
             };
             MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), _info);
-
+            horse_selected = true;
             yield return new WaitForSeconds(_waittime);
         }
         public void GenerateRandomLetter(GameObject _horse, HorseInfo _horseInfo)
@@ -265,7 +255,7 @@ namespace Dll_Project
                 {
                     Horses[_t.index].Translate(Vector3.forward * _t.speed * Time.deltaTime);
                     Horses[_t.index].Find("HorseObj").GetChild(0).GetComponent<Animator>().SetBool("Eat_b", false);
-                    Horses[_t.index].Find("HorseObj").GetChild(0).GetComponent<Animator>().SetFloat("Speed_f", 0.5f);
+                    Horses[_t.index].Find("HorseObj").GetChild(0).GetComponent<Animator>().SetFloat("Speed_f", _t.speed);
                     WsMovingObj _moveinfo = new WsMovingObj
                     {
                         id = _t.user_id,
@@ -329,6 +319,7 @@ namespace Dll_Project
             };
 
             string ___info = JsonMapper.ToJson(_info);
+            Debug.Log(_info.__horseinfo[0].NoOfUsers);
             WsCChangeInfo y = new WsCChangeInfo
             {
                 a = "OK",
@@ -339,5 +330,7 @@ namespace Dll_Project
         }
 
        
+
+      
     }
 }
