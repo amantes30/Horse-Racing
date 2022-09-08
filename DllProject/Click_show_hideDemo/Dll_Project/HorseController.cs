@@ -8,6 +8,21 @@ using UnityEngine.EventSystems;
 using UnityEngine.Events;
 using System.Collections;
 using DG.Tweening;
+
+/*
+ * ReadMe
+ * 
+ * for unity scene
+ *      the horses need to be child object of the Table object
+ *          horses need to have the animator component
+ * 
+ *      the maincanvas is the canvas that user interacts with to start game
+ *      Rename this objects in the scene
+ *          button to start game = "StartGame"
+ *          timer text when the game starts = "Timer"
+ *          speed text when the game starts = "Speed"
+ * 
+ */
 public class HorseInfo
 {
     public string user_id { get; set; }
