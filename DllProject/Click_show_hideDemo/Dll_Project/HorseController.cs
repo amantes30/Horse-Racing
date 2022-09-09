@@ -102,6 +102,16 @@ namespace Dll_Project
                     b = user_id,
                     c = activePlayers.ToString()
                 };MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), _info);
+            }); 
+            AddEventTrig(EventTriggerType.PointerEnter, () =>
+            {
+                RawImage img = MainCanvas.transform.GetChild(0).Find("StartGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
+                img.transform.DOScaleX(1, 0.2f);
+            });
+            AddEventTrig(EventTriggerType.PointerExit, () =>
+            {
+                RawImage img = MainCanvas.transform.GetChild(0).Find("StartGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
+                img.transform.DOScaleX(0, 0.2f);
             });
         }
         void AddEventTrig(EventTriggerType ET, UnityAction UA)
