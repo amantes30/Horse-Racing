@@ -76,6 +76,7 @@ namespace Dll_Project
       
         public override void Start()
         {
+            RoomConnect();
             if (mStaticThings.I != null && !mStaticThings.I.isVRApp)
             {
                 user_id = mStaticThings.I.mAvatarID;
@@ -220,7 +221,7 @@ namespace Dll_Project
                 _hostID = HostID,
                 activeUsers = activePlayers,
             };
-
+            MainCanvas.transform.GetChild(0).DOScaleX(1, 0.2f);
             string ___info = JsonMapper.ToJson(_info);
             WsCChangeInfo wsCChangeInfo = new WsCChangeInfo
             {

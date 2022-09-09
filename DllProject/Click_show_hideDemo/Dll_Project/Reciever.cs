@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using LitJson;
-
+using DG.Tweening;
 namespace Dll_Project
 {
     public class Reciever : DllGenerateBase
@@ -50,7 +50,8 @@ namespace Dll_Project
             switch (ms.a)
             { 
                 case "RoomConnected":
-                    if(mStaticThings.I.mAvatarID == HostID)
+                    
+                    if (mStaticThings.I.mAvatarID == HostID)
                     {
                         NewUserInfo _info = JsonMapper.ToObject<NewUserInfo>(ms.c);
                         _info = new NewUserInfo() {
