@@ -146,6 +146,20 @@ namespace Dll_Project
                 if (mStaticThings.I.mAvatarID == HostID)
                 {
                     Accelerate();
+                    foreach (Transform _t in Horses)
+                    {
+                        WsMovingObj _mov = new WsMovingObj()
+                        {
+                            id = HostID,
+                            islocal = true,
+                            position = _t.localPosition,
+                            rotation = _t.localRotation,
+                            scale = _t.localScale,
+                            mark = "i",
+                            name = _t.name,
+                        };
+                        MessageDispatcher.SendMessageData(WsMessageType.SendMovingObj.ToString(), _mov);
+                    }
                 }
                 
                 
@@ -212,6 +226,7 @@ namespace Dll_Project
         
         void Accelerate()
         {
+            Debug.Log("ACCCCCCC");
            foreach (HorseInfo i in _horsesInfo)
             {
                 if (i.selcted)
@@ -230,7 +245,8 @@ namespace Dll_Project
             {
                 a = "AddSpeed",
                 b = myhorseIndex.ToString(),
-            };     
+            };
+            MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), p);
         }
         void RoomConnect()
         {
@@ -260,6 +276,7 @@ namespace Dll_Project
                 MainCanvas.transform.GetChild(0).Find("Timer").GetComponent<Text>().text = currCountdownValue.ToString();
                 //Debug.Log("Countdown: " + currCountdownValue);
                 yield return new WaitForSeconds(1.0f);
+                
                 currCountdownValue--;
             }
             

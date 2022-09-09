@@ -156,10 +156,9 @@ namespace Dll_Project
                     HorseController._i.activePlayers++;
                     HorseController._i.Doors[index].GetComponent<Animator>().SetTrigger("Open");
 
-                    while (HorseController._i.Horses[index].localPosition.x > -161)
-                    {
-                        HorseController._i.Horses[index].GetComponent<Animator>().Play("Walk");
-                    }
+                   
+                        
+                    
 
                     foreach (HorseInfo y in HorseController._i._horsesInfo)
                     {
@@ -167,13 +166,33 @@ namespace Dll_Project
                         {
                             
                             mStaticThings.I.StartCoroutine(HorseController._i.StartCountdown(3));
+                            HorseController._i.Horses[y.index].GetComponent<Animator>().SetInteger("Speed", 1);
                         }
                     } 
                     Debug.Log("select Message");
                     break;
                 case "StartGame":
+
                     foreach (HorseInfo o in HorseController._i._horsesInfo)
                     {
+                        if (ms.b == HostID)
+                        {
+                            if (o.selcted)
+                            {
+                                Transform _t = HorseController._i.Horses[o.index];
+                                WsMovingObj _mov = new WsMovingObj()
+                                {
+                                    id = HostID,
+                                    islocal = true,
+                                    position = _t.localPosition,
+                                    rotation = _t.localRotation,
+                                    scale = _t.localScale,
+                                    mark = "s",
+                                    name = _t.name,
+                                };
+                                MessageDispatcher.SendMessageData(WsMessageType.SendMovingObj.ToString(), _mov);
+                            }
+                        }
                         if (o.user_id == mStaticThings.I.mAvatarID)
                         {
                             StartGame();
@@ -232,14 +251,16 @@ namespace Dll_Project
                 {
                     Transform selectedhorse = HorseController._i.Horses[i.index];
                     HorseInfo _info = HorseController._i._horsesInfo[i.index];
-                    i.speed = 0.5f;
+                    i.speed = 5f;
+                    selectedhorse.GetComponent<Animator>().SetInteger("Speed", 2);
                     //selectedhorse.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "当前播放";//playing
                     
                 }
-                HorseController._i.GameStarted = true;
-                game_started = true;
+
 
             }
+            HorseController._i.GameStarted = true;
+            game_started = true;
         }
 
         IEnumerator ResetGame(int winner_index)
