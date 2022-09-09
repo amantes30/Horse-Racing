@@ -92,6 +92,7 @@ namespace Dll_Project
             // INITIALIZE HORSES AND HORSE STATUS IN A LIST
             for (int i = 0; i < table.childCount - 1; i++)
             {
+                
                 Horses.Add(table.GetChild(i));
                 HorseInfo h_inf = new HorseInfo {
                     index = i,
@@ -125,8 +126,8 @@ namespace Dll_Project
             {
                 RawImage img = MainCanvas.transform.GetChild(0).Find("JoinGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
                 img.transform.DOScaleX(0, 0.2f);
-            }); RoomConnect();
-
+            }); 
+            RoomConnect();
         }
         void AddEventTrig(EventTriggerType ET, UnityAction UA)
         {
@@ -214,8 +215,7 @@ namespace Dll_Project
             }*/
             
         }
-    
-       
+
         IEnumerator SelectHorse(GameObject _obj, int _waittime)
         {
 
@@ -250,6 +250,8 @@ namespace Dll_Project
         }
         void RoomConnect()
         {
+
+            Debug.LogError("econ");
             NewUserInfo _info = new NewUserInfo()
             {
                 __horseinfo = _horsesInfo,

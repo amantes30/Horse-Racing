@@ -301,6 +301,7 @@ D:\Unity Projects\vswork\horseDemo\DllProject\Click_show_hideDemo\Dll_Project\ob
 D:\Unity Projects\vswork\horseDemo\DllProject\Click_show_hideDemo\Dll_Project\obj\Debug\netstandard2.0\Dll_Project.csproj.CopyComplete
 D:\Unity Projects\vswork\horseDemo\DllProject\Click_show_hideDemo\Dll_Project\obj\Debug\netstandard2.0\Dll_Project.dll
 D:\Unity Projects\vswork\horseDemo\DllProject\Click_show_hideDemo\Dll_Project\obj\Debug\netstandard2.0\Dll_Project.pdb
+G:\myProject\vsvrsdk\vsvrsdk\DllProject\Click_show_hideDemo\Dll_Project\bin\Debug\netstandard2.0\UnityEngine.CoreModule.xml
 G:\myProject\vsvrsdk\vsvrsdk\DllProject\Click_show_hideDemo\Dll_Project\bin\Debug\netstandard2.0\Dll_Project.deps.json
 G:\myProject\vsvrsdk\vsvrsdk\DllProject\Click_show_hideDemo\Dll_Project\bin\Debug\netstandard2.0\Dll_Project.dll
 G:\myProject\vsvrsdk\vsvrsdk\DllProject\Click_show_hideDemo\Dll_Project\bin\Debug\netstandard2.0\Dll_Project.pdb
@@ -398,7 +399,6 @@ G:\myProject\vsvrsdk\vsvrsdk\DllProject\Click_show_hideDemo\Dll_Project\bin\Debu
 G:\myProject\vsvrsdk\vsvrsdk\DllProject\Click_show_hideDemo\Dll_Project\bin\Debug\netstandard2.0\UnityEngine.ClothModule.xml
 G:\myProject\vsvrsdk\vsvrsdk\DllProject\Click_show_hideDemo\Dll_Project\bin\Debug\netstandard2.0\UnityEngine.ClusterInputModule.xml
 G:\myProject\vsvrsdk\vsvrsdk\DllProject\Click_show_hideDemo\Dll_Project\bin\Debug\netstandard2.0\UnityEngine.ClusterRendererModule.xml
-G:\myProject\vsvrsdk\vsvrsdk\DllProject\Click_show_hideDemo\Dll_Project\bin\Debug\netstandard2.0\UnityEngine.CoreModule.xml
 G:\myProject\vsvrsdk\vsvrsdk\DllProject\Click_show_hideDemo\Dll_Project\bin\Debug\netstandard2.0\UnityEngine.CrashReportingModule.xml
 G:\myProject\vsvrsdk\vsvrsdk\DllProject\Click_show_hideDemo\Dll_Project\bin\Debug\netstandard2.0\UnityEngine.DirectorModule.xml
 G:\myProject\vsvrsdk\vsvrsdk\DllProject\Click_show_hideDemo\Dll_Project\bin\Debug\netstandard2.0\UnityEngine.DSPGraphModule.xml

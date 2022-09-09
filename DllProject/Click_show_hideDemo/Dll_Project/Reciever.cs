@@ -47,6 +47,7 @@ namespace Dll_Project
         void RecieveCChangeObj(IMessage m)
         {
             WsCChangeInfo ms = m.Data as WsCChangeInfo;
+            Debug.LogError(ms.a);
             switch (ms.a)
             { 
                 case "RoomConnected":
