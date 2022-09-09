@@ -55,6 +55,7 @@ namespace Dll_Project
 
         public List<HorseInfo> _horsesInfo = new List<HorseInfo>();   // Store Horse Information
 
+        public List<Transform> Doors = new List<Transform>();
         public int activePlayers = 0;
 
         public bool ButtonPressed, GameStarted = false;
@@ -100,6 +101,7 @@ namespace Dll_Project
                     speed = 0,
                 };
                 _horsesInfo.Add(h_inf);
+                Doors.Add(BaseMono.ExtralDatas[3].Info[i].Target);
             }
             MainCanvas.transform.GetChild(0).Find("JoinGame").GetComponent<Button>().onClick.AddListener(() =>
             {
@@ -260,7 +262,7 @@ namespace Dll_Project
                 yield return new WaitForSeconds(1.0f);
                 currCountdownValue--;
             }
-            yield return new WaitUntil(() => activePlayers > 1);
+            
             Debug.Log("DONEEE");
             WsCChangeInfo ms = new WsCChangeInfo
             {

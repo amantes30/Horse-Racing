@@ -128,7 +128,7 @@ namespace Dll_Project
                     break;
                 case "SelectHorse":
                     
-                    Transform selectedhorse;
+                    
                     HorseInfo selectedInfo = new HorseInfo(); 
                     int index = 0;
                     if (mStaticThings.I.mAvatarID == ms.c)
@@ -137,7 +137,7 @@ namespace Dll_Project
                         index = int.Parse(ms.b);
 
                         HorseController._i.myhorseIndex = index;
-                        selectedhorse = HorseController._i.Horses[index];
+                        Transform selectedhorse = HorseController._i.Horses[index];
                         selectedInfo = HorseController._i._horsesInfo[index];
                         ;
                         // set button Off
@@ -154,23 +154,34 @@ namespace Dll_Project
                     }
                     HorseController._i._horsesInfo[index] = selectedInfo;
                     HorseController._i.activePlayers++;
+                    HorseController._i.Doors[index].GetComponent<Animator>().SetTrigger("Open");
+
+                    while (HorseController._i.Horses[index].localPosition.x > -161)
+                    {
+                        HorseController._i.Horses[index].GetComponent<Animator>().Play("Walk");
+                    }
 
                     foreach (HorseInfo y in HorseController._i._horsesInfo)
                     {
                         if (y.user_id == mStaticThings.I.mAvatarID)
                         {
+                            
                             mStaticThings.I.StartCoroutine(HorseController._i.StartCountdown(3));
                         }
                     } 
                     Debug.Log("select Message");
                     break;
                 case "StartGame":
-                    /// turn OFF startGame btn
-                    canvas.transform.GetChild(0).Find("StartGame").gameObject.SetActive(false);
-                    // set hostID
-                    HorseController._i.HostID = HorseController._i.HostID == "" ? mStaticThings.I.mAvatarID : ms.b;
-                    Debug.Log(ms.b);
-                    StartGame();
+                    foreach (HorseInfo o in HorseController._i._horsesInfo)
+                    {
+                        if (o.user_id == mStaticThings.I.mAvatarID)
+                        {
+                            StartGame();
+                        }
+                    }
+                    
+
+                    
                     break;
                 case "SpeedControl":                   
                     if (mStaticThings.I.mAvatarID == HorseController._i.HostID)
@@ -221,8 +232,8 @@ namespace Dll_Project
                 {
                     Transform selectedhorse = HorseController._i.Horses[i.index];
                     HorseInfo _info = HorseController._i._horsesInfo[i.index];
-                    i.speed = 0.1f;
-                    selectedhorse.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "当前播放";//playing
+                    i.speed = 0.5f;
+                    //selectedhorse.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "当前播放";//playing
                     
                 }
                 HorseController._i.GameStarted = true;
