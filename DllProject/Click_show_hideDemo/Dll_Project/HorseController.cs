@@ -62,10 +62,16 @@ namespace Dll_Project
         public string HostID = "";
         private string user_id;
 
+        public int myhorseIndex;
+
+        public int touchCount;
+
         public override void Init()
         {
+            _i = this;
             table = BaseMono.ExtralDatas[0].Target.transform;
             MainCanvas = BaseMono.ExtralDatas[1].Target.GetComponent<Canvas>();
+            
             Debug.Log("HorseController Init !");
         }
 
@@ -76,11 +82,12 @@ namespace Dll_Project
       
         public override void Start()
         {
-            RoomConnect();
-            if (mStaticThings.I != null && !mStaticThings.I.isVRApp)
-            {
+            
+            MainCanvas.transform.GetChild(1).Find("SpeedBtn").GetComponent<Button>().onClick.AddListener(() => { });
+            
+           
                 user_id = mStaticThings.I.mAvatarID;
-            }
+            
             // INITIALIZE HORSES AND HORSE STATUS IN A LIST
             for (int i = 0; i < table.childCount - 1; i++)
             {
@@ -94,25 +101,30 @@ namespace Dll_Project
                 };
                 _horsesInfo.Add(h_inf);
             }
-            MainCanvas.transform.GetChild(0).Find("StartGame").GetComponent<Button>().onClick.AddListener(() =>
+            MainCanvas.transform.GetChild(0).Find("JoinGame").GetComponent<Button>().onClick.AddListener(() =>
             {
+                Debug.Log("fdssfff");
+                
                 WsCChangeInfo _info = new WsCChangeInfo()
                 {
                     a = "CheckGameStatus",
                     b = user_id,
                     c = activePlayers.ToString()
-                };MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), _info);
+                };
+                MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), _info);
             }); 
+            MainCanvas.transform.GetChild(0).Find("JoinGame").gameObject.AddComponent<EventTrigger>();
             AddEventTrig(EventTriggerType.PointerEnter, () =>
             {
-                RawImage img = MainCanvas.transform.GetChild(0).Find("StartGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
+                RawImage img = MainCanvas.transform.GetChild(0).Find("JoinGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
                 img.transform.DOScaleX(1, 0.2f);
             });
             AddEventTrig(EventTriggerType.PointerExit, () =>
             {
-                RawImage img = MainCanvas.transform.GetChild(0).Find("StartGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
+                RawImage img = MainCanvas.transform.GetChild(0).Find("JoinGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
                 img.transform.DOScaleX(0, 0.2f);
-            });
+            }); RoomConnect();
+
         }
         void AddEventTrig(EventTriggerType ET, UnityAction UA)
         {
@@ -123,7 +135,7 @@ namespace Dll_Project
             EventTrigger.Entry entry = new EventTrigger.Entry() { callback = trigger, eventID = ET };
 
             // Add the EventTrigger.Entry to delegates list on the EventTrigger
-            MainCanvas.transform.GetChild(0).Find("StartGame").gameObject.GetComponent<EventTrigger>().triggers.Add(entry);
+            MainCanvas.transform.GetChild(0).Find("JoinGame").gameObject.GetComponent<EventTrigger>().triggers.Add(entry);
         }
         public override void LateUpdate()
         {
@@ -134,10 +146,10 @@ namespace Dll_Project
                     Accelerate();
                 }
                 
-                AddSpeed();
                 
                 
-                MainCanvas.transform.GetChild(0).Find("Speed").gameObject.SetActive(true);
+                
+                
 
             }
         }
@@ -195,32 +207,28 @@ namespace Dll_Project
 
             yield return new WaitForSeconds(_waittime);
         }
-        public void GenerateRandomLetter(GameObject _horse, HorseInfo _horseInfo)
-        {
-            if (mStaticThings.I.mAvatarID != _horseInfo.user_id) { return; }
-            MainCanvas.transform.GetChild(0).GetChild(0).gameObject.SetActive(true);
-            char lt = new char();
-            string s = "";
-            while (s=="" || s =="a" || s=="w" || s == "s" || s == "d")
-            {
-                System.Random rnd = new System.Random();
-                lt = (char)rnd.Next('a', 'z');
-                s = lt.ToString();
-            }
-            
-
-            ButtonPressed = false;
-            MainCanvas.transform.GetChild(0).Find("Req_Input").GetComponent<Text>().text = s.ToUpper();            
-            
-            req_inpt = s;
-        }
+        
         void Accelerate()
         {
-           
+           foreach (HorseInfo i in _horsesInfo)
+            {
+                if (i.selcted)
+                {
+                    Horses[i.index].Translate(Vector3.forward * i.speed);
+                    if (i.touchCount >= 10)
+                    {
+                        AddSpeed();
+                    }
+                }
+            }
         }
         void AddSpeed()
         {
-           
+            WsCChangeInfo p = new WsCChangeInfo()
+            {
+                a = "AddSpeed",
+                b = myhorseIndex.ToString(),
+            };     
         }
         void RoomConnect()
         {

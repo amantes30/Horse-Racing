@@ -8,15 +8,15 @@ namespace Dll_Project
 {
     public class Reciever : DllGenerateBase
     {
-        private Canvas canvas;
+        public Canvas canvas;
 
         private string HostID;
-
+        
         
         private bool game_started = false;
         public override void Init()
         {
-           
+            canvas = HorseController._i.MainCanvas;
             Debug.Log("Reciever Is ON"); 
             
         }
@@ -27,7 +27,7 @@ namespace Dll_Project
         }
         public override void Start()
         {
-            canvas = HorseController._i.MainCanvas;
+            
             
             Debug.Log("Reciever Is On");
         }
@@ -50,7 +50,7 @@ namespace Dll_Project
             switch (ms.a)
             { 
                 case "RoomConnected":
-                    
+                    Debug.Log("yyy");
                     if (mStaticThings.I.mAvatarID == HostID)
                     {
                         NewUserInfo _info = JsonMapper.ToObject<NewUserInfo>(ms.c);
@@ -94,47 +94,74 @@ namespace Dll_Project
                     }
                     break;
                 case "CheckGameStatus":
+                   
                     bool already_started, full = false;
                     
-                    if (mStaticThings.I.mAvatarID == ms.b)
+                    if(mStaticThings.I.mAvatarID == ms.b)
                     {
-                        int indexx = int.Parse(ms.c);
-                        if(int.Parse(ms.c) > 10 || HorseController._i.GameStarted)
-                        {
-                            // FULL
-
-                        }
-                        else
-                        {
-                            WsCChangeInfo I = new WsCChangeInfo()
-                            {
-                                a = "Select Horse",
-                                b = indexx.ToString(),
-                                c = mStaticThings.I.mAvatarID,
-                                
-                            };MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), I);
-                        }
+                        HostID = HostID == "" ? ms.b : HostID; 
                     }
+                   
+                    int indexx = int.Parse(ms.c);
+                    if(int.Parse(ms.c) > 10 || HorseController._i.GameStarted)
+                    {
+                    // FULL,  WAIT FEW MINUTES UI
+
+                        
+                    }
+                    else
+                    {
+                        
+                        Debug.Log(indexx.ToString());
+                        Debug.Log(mStaticThings.I.mAvatarID);
+                        WsCChangeInfo OOI = new WsCChangeInfo                    
+                        {
+                            a = "SelectHorse",
+                            b = indexx.ToString(),
+                            c = mStaticThings.I.mAvatarID,
+                                
+                        };
+                        MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), OOI);
+                    }
+                        
+
                     break;
-                case "Select Horse":
+                case "SelectHorse":
+                    
+                    Transform selectedhorse;
+                    HorseInfo selectedInfo = new HorseInfo(); 
+                    int index = 0;
                     if (mStaticThings.I.mAvatarID == ms.c)
                     {
-                        int index = int.Parse(ms.b);
+                        
+                        index = int.Parse(ms.b);
 
-                        Transform selectedhorse = HorseController._i.Horses[index];
-                        HorseInfo selectedInfo = HorseController._i._horsesInfo[index];
-
+                        HorseController._i.myhorseIndex = index;
+                        selectedhorse = HorseController._i.Horses[index];
+                        selectedInfo = HorseController._i._horsesInfo[index];
+                        ;
                         // set button Off
-                        canvas.transform.GetChild(0).Find("StartGame").gameObject.SetActive(false);
-                        selectedhorse.GetChild(3).GetChild(0).GetChild(3).gameObject.SetActive(true);
-
+                        canvas.transform.GetChild(0).Find("JoinGame").gameObject.SetActive(false);
+                        selectedhorse.gameObject.SetActive(true);
+                        Debug.Log("sssss");
 
                         // update horse information
                         selectedInfo.selcted = true;
                         selectedInfo.user_id = ms.c;
-                        HostID = mStaticThings.I.mAvatarID;
+                        
+
 
                     }
+                    HorseController._i._horsesInfo[index] = selectedInfo;
+                    HorseController._i.activePlayers++;
+
+                    foreach (HorseInfo y in HorseController._i._horsesInfo)
+                    {
+                        if (y.user_id == mStaticThings.I.mAvatarID)
+                        {
+                            //mStaticThings.I.StartCoroutine(HorseController._i.star)
+                        }
+                    } 
                     Debug.Log("select Message");
                     break;
                 case "StartGame":
@@ -166,6 +193,17 @@ namespace Dll_Project
                     mStaticThings.I.StartCoroutine(ResetGame(int.Parse(ms.b)));
                     break;
 
+                case "AddSpeed":
+                    if (mStaticThings.I.mAvatarID == HostID)
+                    {
+                        int indexxx = int.Parse(ms.b);
+
+                        HorseController._i._horsesInfo[indexxx].speed += 5;
+                            
+                        
+                        
+                    }
+                    break;
                 
             }
         }
@@ -185,7 +223,7 @@ namespace Dll_Project
                     HorseInfo _info = HorseController._i._horsesInfo[i.index];
                     i.speed = 0.1f;
                     selectedhorse.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "当前播放";//playing
-                    HorseController._i.GenerateRandomLetter(selectedhorse.gameObject, _info);
+                    
                 }
                 HorseController._i.GameStarted = true;
                 game_started = true;
@@ -201,12 +239,12 @@ namespace Dll_Project
             }
             HorseController._i.Horses[winner_index].GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "赢家"; //winner
             HorseController._i.GameStarted = false;
-            canvas.transform.GetChild(0).Find("Speed").GetComponent<Text>().text = "速度: 0";
+            canvas.transform.GetChild(1).Find("Speed").GetComponent<Text>().text = "速度: 0";
             yield return new WaitForSeconds(2);
             canvas.transform.GetChild(0).Find("Selected Car").GetComponent<Text>().text = "选定的马：";
             canvas.transform.GetChild(0).Find("Req_Input").GetComponent<Text>().text = "";
 
-            canvas.transform.GetChild(0).Find("Speed").gameObject.SetActive(false);
+            canvas.transform.GetChild(1).Find("Speed").gameObject.SetActive(false);
             if (mStaticThings.I.mAvatarID == HorseController._i.HostID)
             {
                 foreach (Transform _t in HorseController._i.Horses)
