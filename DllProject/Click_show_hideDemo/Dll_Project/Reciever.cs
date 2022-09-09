@@ -166,7 +166,7 @@ namespace Dll_Project
                         if (y.user_id == mStaticThings.I.mAvatarID)
                         {
                             
-                            mStaticThings.I.StartCoroutine(HorseController._i.StartCountdown(3));
+                            mStaticThings.I.StartCoroutine(HorseController._i.StartCountdown(10));
                             HorseController._i.Horses[y.index].GetComponent<Animator>().SetInteger("Speed", 1);
                         }
                     } 

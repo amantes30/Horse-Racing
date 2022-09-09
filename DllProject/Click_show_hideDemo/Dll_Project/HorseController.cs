@@ -67,6 +67,7 @@ namespace Dll_Project
 
         public int touchCount;
 
+        Transform PlayerCamera;
         public override void Init()
         {
             _i = this;
@@ -85,6 +86,7 @@ namespace Dll_Project
         {
             
             MainCanvas.transform.GetChild(1).Find("SpeedBtn").GetComponent<Button>().onClick.AddListener(() => { });
+            PlayerCamera = BaseMono.ExtralDatas[2].Target;
             
            
                 user_id = mStaticThings.I.mAvatarID;
@@ -281,7 +283,10 @@ namespace Dll_Project
                 
                 currCountdownValue--;
             }
-            
+            PlayerCamera.gameObject.SetActive(true);
+            mStaticThings.I.IsThirdCamera = true;
+            mStaticThings.I.Maincamera = PlayerCamera;
+            PositionCamera(myhorseIndex);
             Debug.Log("DONEEE");
             WsCChangeInfo ms = new WsCChangeInfo
             {
@@ -295,5 +300,11 @@ namespace Dll_Project
             MainCanvas.transform.GetChild(1).gameObject.SetActive(true);
         }
 
+        void PositionCamera(int _index)
+        {
+            float zPos = Horses[_index].localPosition.z;
+            
+           PlayerCamera.localPosition = new Vector3 (PlayerCamera.transform.localPosition.x , PlayerCamera.localPosition.y, zPos);
+        }
     }
 }
