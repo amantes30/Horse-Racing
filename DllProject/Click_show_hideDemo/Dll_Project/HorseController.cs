@@ -249,7 +249,30 @@ namespace Dll_Project
             };
             MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), wsCChangeInfo);
         }
+        float currCountdownValue;
+        public IEnumerator StartCountdown(float countdownValue)
+        {
+            currCountdownValue = countdownValue;
+            while (currCountdownValue >= 0)
+            {
+                MainCanvas.transform.GetChild(0).Find("Timer").GetComponent<Text>().text = currCountdownValue.ToString();
+                //Debug.Log("Countdown: " + currCountdownValue);
+                yield return new WaitForSeconds(1.0f);
+                currCountdownValue--;
+            }
+            yield return new WaitUntil(() => activePlayers > 1);
+            Debug.Log("DONEEE");
+            WsCChangeInfo ms = new WsCChangeInfo
+            {
+                a = "StartGame",
+                b = mStaticThings.I.mAvatarID
+            };
+            MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ms);
+            MainCanvas.transform.GetChild(0).Find("JoinGame").gameObject.SetActive(false);
 
-       
+            MainCanvas.transform.GetChild(0).Find("Rules").gameObject.SetActive(false);
+            MainCanvas.transform.GetChild(1).gameObject.SetActive(true);
+        }
+
     }
 }

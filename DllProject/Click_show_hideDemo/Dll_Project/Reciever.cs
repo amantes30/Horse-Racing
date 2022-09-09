@@ -149,7 +149,7 @@ namespace Dll_Project
                         selectedInfo.selcted = true;
                         selectedInfo.user_id = ms.c;
                         
-
+                        
 
                     }
                     HorseController._i._horsesInfo[index] = selectedInfo;
@@ -159,7 +159,7 @@ namespace Dll_Project
                     {
                         if (y.user_id == mStaticThings.I.mAvatarID)
                         {
-                            //mStaticThings.I.StartCoroutine(HorseController._i.star)
+                            mStaticThings.I.StartCoroutine(HorseController._i.StartCountdown(3));
                         }
                     } 
                     Debug.Log("select Message");
