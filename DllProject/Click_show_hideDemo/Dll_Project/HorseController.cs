@@ -26,7 +26,7 @@ using DG.Tweening;
 public class HorseInfo
 {
     public string user_id { get; set; }
-    public bool selcted= false;    
+    public bool selcted, ready= false;    
     public int index;
     public int touchCount;
     public float speed = 0;
@@ -52,6 +52,7 @@ namespace Dll_Project
         public Transform table;
         
         public List<Transform> Horses = new List<Transform>();        // List Of Horse Objects
+        public List<HorseInfo> WinnerList = new List<HorseInfo>();        // List Of Horse Objects
 
         public List<HorseInfo> _horsesInfo = new List<HorseInfo>();   // Store Horse Information
 
@@ -67,7 +68,9 @@ namespace Dll_Project
 
         public int touchCount;
 
-        Transform PlayerCamera;
+        public Transform PlayerCamera;
+
+        // WIN POSX -417
         public override void Init()
         {
             _i = this;
@@ -85,7 +88,10 @@ namespace Dll_Project
         public override void Start()
         {
             
-            MainCanvas.transform.GetChild(1).Find("SpeedBtn").GetComponent<Button>().onClick.AddListener(() => { });
+            MainCanvas.transform.GetChild(1).Find("SpeedBtn").GetComponent<Button>().onClick.AddListener(() => 
+            {
+                touchCount++;
+            });
             PlayerCamera = BaseMono.ExtralDatas[2].Target;
             
            
@@ -142,10 +148,11 @@ namespace Dll_Project
             // Add the EventTrigger.Entry to delegates list on the EventTrigger
             MainCanvas.transform.GetChild(0).Find("JoinGame").gameObject.GetComponent<EventTrigger>().triggers.Add(entry);
         }
-        public override void LateUpdate()
+        public override void Update()
         {
             if (GameStarted)
             {
+                Debug.Log(HostID);
                 if (mStaticThings.I.mAvatarID == HostID)
                 {
                     Accelerate();
@@ -175,7 +182,7 @@ namespace Dll_Project
         public override void OnEnable()
         {
             Debug.Log("HorseController OnEnable !");
-            MessageDispatcher.AddListener(VRPointObjEventType.VRPointClick.ToString(), Clicked);
+            
             
            
         }
@@ -183,7 +190,6 @@ namespace Dll_Project
         public override void OnDisable()
         {
             Debug.Log("HorseController OnDisable !");
-            MessageDispatcher.RemoveListener(VRPointObjEventType.VRPointClick.ToString(), Clicked);
             
         }
 
@@ -204,39 +210,38 @@ namespace Dll_Project
             img.transform.DOScaleX(0, 0.2f);
 
         }
-        void Clicked(IMessage msg)
-        {
-            GameObject Obj = msg.Data as GameObject;
-            Debug.Log((Obj.name).Split('_')[0]);
-            /*switch ((Obj.name).Split('_')[0])
-            {
-                case "Button":
-                    mStaticThings.I.StartCoroutine(SelectHorse(Obj,8));
-                    break;               
-                default: break;
-            }*/
-            
-        }
+        
 
-        IEnumerator SelectHorse(GameObject _obj, int _waittime)
-        {
 
-            
-
-            yield return new WaitForSeconds(_waittime);
-        }
         
         void Accelerate()
         {
-            Debug.Log("ACCCCCCC");
+           Debug.Log("ACCCCCCC");
            foreach (HorseInfo i in _horsesInfo)
             {
-                if (i.selcted)
+                if (i.selcted && i.ready)
                 {
+                    MainCanvas.transform.GetChild(1).Find("Speed").GetComponent<Text>().text = "Speed: " + (i.speed * 100);
+                    //Vector3 newPos = new Vector3(PlayerCamera.position.x-2, PlayerCamera.position.y, PlayerCamera.position.z);
+                    PlayerCamera.localPosition = new Vector3(Horses[i.index].localPosition.x + 2, PlayerCamera.localPosition.y, PlayerCamera.localPosition.z);
                     Horses[i.index].Translate(Vector3.forward * i.speed);
-                    if (i.touchCount >= 10)
+                    if (Horses[i.index].localPosition.x < -100)
+                    {
+                        WsCChangeInfo ii = new WsCChangeInfo()
+                        {
+                            a = "Finished",
+                            b = i.index.ToString(),
+                            c= mStaticThings.I.mAvatarID,
+                        };
+                        MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ii);
+                        
+                        
+                    }
+                    
+                    else if(touchCount >=10)
                     {
                         AddSpeed();
+                        touchCount = 0;
                     }
                 }
             }
@@ -254,20 +259,14 @@ namespace Dll_Project
         {
 
             Debug.LogError("econ");
-            NewUserInfo _info = new NewUserInfo()
-            {
-                __horseinfo = _horsesInfo,
-                _gameStarted = GameStarted,
-                _hostID = HostID,
-                activeUsers = activePlayers,
-            };
+            
             MainCanvas.transform.GetChild(0).DOScaleX(1, 0.2f);
-            string ___info = JsonMapper.ToJson(_info);
+            
             WsCChangeInfo wsCChangeInfo = new WsCChangeInfo
             {
                 a = "RoomConnected",
                 b = user_id,                
-                c = ___info,
+               
             };
             MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), wsCChangeInfo);
         }
@@ -277,34 +276,44 @@ namespace Dll_Project
             currCountdownValue = countdownValue;
             while (currCountdownValue >= 0)
             {
-                MainCanvas.transform.GetChild(0).Find("Timer").GetComponent<Text>().text = currCountdownValue.ToString();
+                MainCanvas.transform.GetChild(0).Find("Timer").GetComponent<Text>().text =
+                    "目前玩家" + activePlayers.ToString() + "人，游戏还剩" + currCountdownValue.ToString() + "秒开始";
+                currCountdownValue.ToString();
                 //Debug.Log("Countdown: " + currCountdownValue);
                 yield return new WaitForSeconds(1.0f);
-                
+
                 currCountdownValue--;
             }
-            PlayerCamera.gameObject.SetActive(true);
-            mStaticThings.I.IsThirdCamera = true;
-            mStaticThings.I.Maincamera = PlayerCamera;
-            PositionCamera(myhorseIndex);
-            Debug.Log("DONEEE");
-            WsCChangeInfo ms = new WsCChangeInfo
+            if (GameStarted)
             {
-                a = "StartGame",
-                b = mStaticThings.I.mAvatarID
-            };
-            MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ms);
-            MainCanvas.transform.GetChild(0).Find("JoinGame").gameObject.SetActive(false);
+                PlayerCamera.gameObject.SetActive(true);
+                mStaticThings.I.IsThirdCamera = true;
+                mStaticThings.I.PCCamra = PlayerCamera;
+                PositionCamera(myhorseIndex);
+                Debug.Log("DONEEE");
+                WsCChangeInfo ms = new WsCChangeInfo
+                {
+                    a = "StartGame",
+                    b = mStaticThings.I.mAvatarID
+                };
+                MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ms);
 
-            MainCanvas.transform.GetChild(0).Find("Rules").gameObject.SetActive(false);
-            MainCanvas.transform.GetChild(1).gameObject.SetActive(true);
+
+                MainCanvas.transform.GetChild(1).gameObject.SetActive(true);
+                MainCanvas.transform.GetChild(0).Find("Timer").DOScaleX(0, 0.5f);
+            }
+            else
+            {
+                mStaticThings.I.StartCoroutine( StartCountdown(15));
+            }
         }
 
         void PositionCamera(int _index)
         {
+            PlayerCamera.gameObject.SetActive(true);
             float zPos = Horses[_index].localPosition.z;
             
-           PlayerCamera.localPosition = new Vector3 (PlayerCamera.transform.localPosition.x , PlayerCamera.localPosition.y, zPos);
+            PlayerCamera.localPosition = new Vector3 (PlayerCamera.transform.localPosition.x , PlayerCamera.localPosition.y, zPos);
         }
     }
 }
