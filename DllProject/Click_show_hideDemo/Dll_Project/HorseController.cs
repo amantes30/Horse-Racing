@@ -115,14 +115,32 @@ namespace Dll_Project
             MainCanvas.transform.GetChild(0).Find("JoinGame").GetComponent<Button>().onClick.AddListener(() =>
             {
                 Debug.Log("fdssfff");
-                
-                WsCChangeInfo _info = new WsCChangeInfo()
+                if(activePlayers == 0) { HostID = user_id; }
+                if (activePlayers <= 10)
                 {
-                    a = "CheckGameStatus",
-                    b = user_id,
-                    c = activePlayers.ToString()
-                };
-                MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), _info);
+                    MainCanvas.transform.GetChild(0).Find("Rules").DOScaleX(0, 0.5f);
+                    MainCanvas.transform.GetChild(0).Find("JoinGame").DOScaleX(0, 0.5f);
+                    MainCanvas.transform.GetChild(0).Find("Timer").DOScaleX(1, 0.5f);
+                    Debug.Log(activePlayers.ToString());
+                    Debug.Log(mStaticThings.I.mAvatarID);
+
+                    myhorseIndex = activePlayers;
+                    Transform selectedhorse = HorseController._i.Horses[myhorseIndex];
+
+                    WsCChangeInfo _info = new WsCChangeInfo()
+                    {
+                        a = "SelectHorse",
+                        b = myhorseIndex.ToString(),
+                        c = user_id,
+                        d = HostID,
+                    };
+                    MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), _info);
+                }
+                else if(activePlayers > 10)
+                {
+                    // FULL,  WAIT FEW MINUTES UI
+                }
+
             }); 
             MainCanvas.transform.GetChild(0).Find("JoinGame").gameObject.AddComponent<EventTrigger>();
             AddEventTrig(EventTriggerType.PointerEnter, () =>
@@ -152,30 +170,42 @@ namespace Dll_Project
         {
             if (GameStarted)
             {
+                MainCanvas.transform.GetChild(1).Find("Speed").GetComponent<Text>().text = "Speed: " + (_horsesInfo[myhorseIndex].speed * 100);
+                
+                PlayerCamera.localPosition = new Vector3(Horses[myhorseIndex].localPosition.x + 2, PlayerCamera.localPosition.y, PlayerCamera.localPosition.z);
                 Debug.Log(HostID);
-                if (mStaticThings.I.mAvatarID == HostID)
+                
+                Accelerate();
+                    
+                    
+                
+                if (touchCount >= 10)
                 {
-                    Accelerate();
-                    foreach (Transform _t in Horses)
-                    {
-                        WsMovingObj _mov = new WsMovingObj()
-                        {
-                            id = HostID,
-                            islocal = true,
-                            position = _t.localPosition,
-                            rotation = _t.localRotation,
-                            scale = _t.localScale,
-                            mark = "i",
-                            name = _t.name,
-                        };
-                        MessageDispatcher.SendMessageData(WsMessageType.SendMovingObj.ToString(), _mov);
-                    }
+                    AddSpeed();
+                    touchCount = 0;
                 }
-                
-                
-                
-                
-                
+                if (Horses[myhorseIndex].localPosition.x < -100)
+                {
+                    WsCChangeInfo ii = new WsCChangeInfo()
+                    {
+                        a = "Finished",
+                        b = myhorseIndex.ToString(),
+                        c = mStaticThings.I.mAvatarID,
+                    };
+                    MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ii);
+                    MainCanvas.transform.GetChild(1).Find("GameOver").DOScaleX(1, 0.2f);
+                    GameStarted = false;
+
+                    MainCanvas.transform.GetChild(1).Find("GameOver").GetChild(0).GetComponent<Text>().text =
+                        "比赛结束 \n 当前排名为：第 " + HorseController._i.WinnerList.Count + "名";
+                    Transform cam = PlayerCamera;
+                    cam.localPosition = new Vector3(-3.9f, cam.localPosition.y, cam.localPosition.z);
+                }
+
+
+
+
+
 
             }
         }
@@ -199,13 +229,13 @@ namespace Dll_Project
         }
         void HoverIn()
         {
-            RawImage img = MainCanvas.transform.GetChild(0).Find("StartGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
+            RawImage img = MainCanvas.transform.GetChild(0).Find("JoinGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
             img.transform.DOScaleX(1, 0.2f);
             
         }
         void HoverOut()
         {
-            RawImage img = MainCanvas.transform.GetChild(0).Find("StartGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
+            RawImage img = MainCanvas.transform.GetChild(0).Find("JoinGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
 
             img.transform.DOScaleX(0, 0.2f);
 
@@ -219,30 +249,21 @@ namespace Dll_Project
            Debug.Log("ACCCCCCC");
            foreach (HorseInfo i in _horsesInfo)
             {
-                if (i.selcted && i.ready)
-                {
-                    MainCanvas.transform.GetChild(1).Find("Speed").GetComponent<Text>().text = "Speed: " + (i.speed * 100);
-                    //Vector3 newPos = new Vector3(PlayerCamera.position.x-2, PlayerCamera.position.y, PlayerCamera.position.z);
-                    PlayerCamera.localPosition = new Vector3(Horses[i.index].localPosition.x + 2, PlayerCamera.localPosition.y, PlayerCamera.localPosition.z);
+                if (i.selcted && i.ready && mStaticThings.I.mAvatarID == HostID)
+                {                    
                     Horses[i.index].Translate(Vector3.forward * i.speed);
-                    if (Horses[i.index].localPosition.x < -100)
+                    WsMovingObj _mov = new WsMovingObj() 
                     {
-                        WsCChangeInfo ii = new WsCChangeInfo()
-                        {
-                            a = "Finished",
-                            b = i.index.ToString(),
-                            c= mStaticThings.I.mAvatarID,
-                        };
-                        MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ii);
-                        
-                        
-                    }
+                        id = i.index.ToString(),
+                        islocal = true,
+                        mark = "i",
+                        name = Horses[i.index].name,
+                        position = Horses[i.index].localPosition,
+                        rotation = Horses[i.index].localRotation,
+                        scale = Horses[i.index].localScale,
+                    };
+                    MessageDispatcher.SendMessageData(WsMessageType.SendMovingObj.ToString(), _mov);
                     
-                    else if(touchCount >=10)
-                    {
-                        AddSpeed();
-                        touchCount = 0;
-                    }
                 }
             }
         }
@@ -252,6 +273,7 @@ namespace Dll_Project
             {
                 a = "AddSpeed",
                 b = myhorseIndex.ToString(),
+                c= mStaticThings.I.mAvatarID
             };
             MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), p);
         }
