@@ -16,13 +16,14 @@ namespace Dll_Project
         private bool game_started = false;
         public override void Init()
         {
+            MessageDispatcher.AddListener(WsMessageType.RecieveCChangeObj.ToString(), RecieveCChangeObj);
             canvas = HorseController._i.MainCanvas;
             Debug.Log("Reciever Is ON"); 
             
         }
         public override void Awake()
         {
-            
+            MessageDispatcher.AddListener(WsMessageType.RecieveCChangeObj.ToString(), RecieveCChangeObj);
             Debug.Log("Reciever Is On");            
         }
         public override void Start()
@@ -51,7 +52,7 @@ namespace Dll_Project
             switch (ms.a)
             { 
                 case "RoomConnected":
-                    Debug.Log("yyy");
+                    Debug.LogError("RoomConnected");
                     NewUserInfo _info;
                     if (HostID != null)
                     {

@@ -76,7 +76,8 @@ namespace Dll_Project
             _i = this;
             table = BaseMono.ExtralDatas[0].Target.transform;
             MainCanvas = BaseMono.ExtralDatas[1].Target.GetComponent<Canvas>();
-            
+            PlayerCamera = BaseMono.ExtralDatas[2].Target;
+
             Debug.Log("HorseController Init !");
         }
 
@@ -87,15 +88,18 @@ namespace Dll_Project
       
         public override void Start()
         {
-            
-            MainCanvas.transform.GetChild(1).Find("SpeedBtn").GetComponent<Button>().onClick.AddListener(() => 
+            // PLEASE CHECK ROOM CONNECT FOR ME
+            RoomConnect();
+
+            Button SpeedUpBtn = MainCanvas.transform.GetChild(1).Find("SpeedBtn").GetComponent<Button>();
+            SpeedUpBtn.onClick.AddListener(() => 
             {
                 touchCount++;
             });
-            PlayerCamera = BaseMono.ExtralDatas[2].Target;
-            
            
-                user_id = mStaticThings.I.mAvatarID;
+
+
+            user_id = mStaticThings.I.mAvatarID;
             
             // INITIALIZE HORSES AND HORSE STATUS IN A LIST
             for (int i = 0; i < table.childCount - 1; i++)
@@ -153,7 +157,7 @@ namespace Dll_Project
                 RawImage img = MainCanvas.transform.GetChild(0).Find("JoinGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
                 img.transform.DOScaleX(0, 0.2f);
             }); 
-            RoomConnect();
+            
         }
         void AddEventTrig(EventTriggerType ET, UnityAction UA)
         {
