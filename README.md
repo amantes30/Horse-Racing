@@ -8,4 +8,8 @@
        - Timer text when the game starts = "Timer".
        - Speed text when the game starts = "Speed".
 
- 
+ # In *Visual Studio*
+ To declare location for outputs
+ From the tool-bar go to *Project -> Dll_Project Properties -> Build Events -> Post-build event command line*
+  - copy "$(TargetDir)$(ProjectName).dll" "**YOUR PREFFERED LOCATION FOR OUTPUT** \$(ProjectName)dll.bytes"
+  - copy "$(TargetDir)$(ProjectName).pdb"  "**YOUR PREFFERED LOCATION FOR OUTPUT** \$(ProjectName)pdb.bytes"
