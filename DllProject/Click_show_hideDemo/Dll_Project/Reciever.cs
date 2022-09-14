@@ -83,6 +83,20 @@ namespace Dll_Project
                         HorseController._i.GameStarted = p._gameStarted;
                         HorseController._i.HostID = p._hostID;
                         HorseController._i.activePlayers = p.activeUsers;
+                        foreach (HorseInfo i in p.__horseinfo)
+                        {
+                            if (i.selcted)
+                            {
+                                WsCChangeInfo io = new WsCChangeInfo()
+                                {
+                                    a = "SelectHorse",
+                                    b = i.index.ToString(),
+                                    c = i.user_id,
+                                    d = HostID,
+                                };
+                                MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), io);
+                            }
+                        }
                         if (p._gameStarted)
                         {
                             canvas.transform.GetChild(0).Find("JoinGame").gameObject.SetActive(false);
@@ -121,22 +135,15 @@ namespace Dll_Project
                     
                     HorseController._i.Doors[index].GetComponent<Animator>().SetTrigger("isOpen");
 
-                   
-                        
                     
-
-                    foreach (HorseInfo y in HorseController._i._horsesInfo)
-                    {
-                        if (y.selcted && !y.ready)
-                        {
                             
-                            mStaticThings.I.StartCoroutine(HorseController._i.StartCountdown(15));
-                            HorseController._i.Horses[y.index].GetComponent<Animator>().SetInteger("Speed", 1);
+                    mStaticThings.I.StartCoroutine(HorseController._i.StartCountdown(15));
+                    HorseController._i.Horses[index].GetComponent<Animator>().SetInteger("Speed", 1);
                            
-                            mStaticThings.I.StartCoroutine(wait(5, HorseController._i.Horses[y.index]));
-                            y.ready = true;
-                        }
-                    } 
+                    mStaticThings.I.StartCoroutine(wait(5, HorseController._i.Horses[index]));
+                    selectedInfo.ready = true;
+                    
+                    
                     Debug.Log("select Message");
                     break;
                 case "StartGame":
