@@ -9,15 +9,19 @@ namespace Dll_Project
     public class Reciever : DllGenerateBase
     {
         public Canvas canvas;
+        Transform _firstPanel;
+        Transform _secondPanel;
 
-        private string HostID;
-        
+        private string HostID;        
         
         private bool game_started = false;
+
         public override void Init()
         {
             MessageDispatcher.AddListener(WsMessageType.RecieveCChangeObj.ToString(), RecieveCChangeObj);
             canvas = HorseController._i.MainCanvas;
+            _firstPanel = canvas.transform.GetChild(0);
+            _secondPanel = canvas.transform.GetChild(1);
             Debug.Log("Reciever Is ON"); 
             
         }
@@ -99,7 +103,7 @@ namespace Dll_Project
                         }
                         if (p._gameStarted)
                         {
-                            canvas.transform.GetChild(0).Find("JoinGame").gameObject.SetActive(false);
+                            _firstPanel.Find("JoinGame").gameObject.SetActive(false);
                             // gamestarted UI wait
                             foreach (HorseInfo o in HorseController._i._horsesInfo)
                             {
@@ -132,14 +136,14 @@ namespace Dll_Project
                     selectedInfo.index = index;
                     HorseController._i._horsesInfo[index] = selectedInfo;
                     HorseController._i.activePlayers++;
-                    
-                    HorseController._i.Doors[index].GetComponent<Animator>().SetTrigger("isOpen");
 
-                    
-                            
+                    Animator DoorAnimator = HorseController._i.Doors[index].GetComponent<Animator>();
+                    DoorAnimator.SetTrigger("isOpen");
+
                     mStaticThings.I.StartCoroutine(HorseController._i.StartCountdown(15));
-                    Animator _animator = HorseController._i.Horses[index].GetComponent<Animator>();
-                    _animator.SetInteger("Speed", 1);
+
+                    Animator h_animator = HorseController._i.Horses[index].GetComponent<Animator>();
+                    h_animator.SetInteger("Speed", 1);
                            
                     mStaticThings.I.StartCoroutine(wait(5, HorseController._i.Horses[index]));
                     selectedInfo.ready = true;
@@ -171,6 +175,7 @@ namespace Dll_Project
                     
                     HorseController._i.WinnerList.Add(HorseController._i._horsesInfo[int.Parse(ms.b)]);
                     HorseController._i.Horses[int.Parse(ms.b)].GetComponent<Animator>().SetInteger("Speed", 1);
+
                     if (HorseController._i.WinnerList.Count == HorseController._i.activePlayers && game_started)
                     {
                         Button ResetBtn = canvas.transform.GetChild(1).Find("ResetButton").GetComponent<Button>();
@@ -261,13 +266,13 @@ namespace Dll_Project
         {
             //HorseController._i.Horses[y.index].GetComponent<Animator>().SetInteger("Speed", 1);
             yield return new WaitForSeconds(1);
-            canvas.transform.GetChild(1).gameObject.SetActive(false);
-            canvas.transform.GetChild(0).gameObject.SetActive(true);
-            canvas.transform.GetChild(0).Find("JoinGame").gameObject.SetActive(true);
-            canvas.transform.GetChild(0).Find("JoinGame").DOScaleX(1, 0.5f);
-            canvas.transform.GetChild(0).Find("Rules").DOScaleX(1, 0.5f);
-            canvas.transform.GetChild(1).Find("GameOver").DOScaleX(0, 0.2f);
-            canvas.transform.GetChild(1).Find("ResetButton").DOScaleX(0, 0.2f);
+            _secondPanel.gameObject.SetActive(false);
+            _firstPanel.gameObject.SetActive(true);
+            _firstPanel.Find("JoinGame").gameObject.SetActive(true);
+            _firstPanel.Find("JoinGame").DOScaleX(1, 0.5f);
+            _firstPanel.Find("Rules").DOScaleX(1, 0.5f);
+            _secondPanel.Find("GameOver").DOScaleX(0, 0.2f);
+            _secondPanel.Find("ResetButton").DOScaleX(0, 0.2f);
 
             foreach (HorseInfo i in HorseController._i._horsesInfo)
             {

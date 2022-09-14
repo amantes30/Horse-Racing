@@ -49,26 +49,25 @@ namespace Dll_Project
 
         // Objects From Scene
         public Canvas MainCanvas;
-        public Transform table;
-        
+        public Transform table;        
+        public Transform PlayerCamera;
+        Transform _firstPanel;
+        Transform _secondPanel;
+
         public List<Transform> Horses = new List<Transform>();        // List Of Horse Objects
-        public List<HorseInfo> WinnerList = new List<HorseInfo>();        // List Of Horse Objects
-
+        public List<HorseInfo> WinnerList = new List<HorseInfo>();       // List Of Horse Objects
         public List<HorseInfo> _horsesInfo = new List<HorseInfo>();   // Store Horse Information
-
         public List<Transform> Doors = new List<Transform>();
+
         public int activePlayers = 0;
+        public int myhorseIndex;
+        public int touchCount;
 
         public bool ButtonPressed, GameStarted = false;
+
         public string req_inpt = string.Empty;
         public string HostID = "";
         public string user_id;
-
-        public int myhorseIndex;
-
-        public int touchCount;
-
-        public Transform PlayerCamera;
 
         // WIN POSX -417
         public override void Init()
@@ -77,7 +76,8 @@ namespace Dll_Project
             table = BaseMono.ExtralDatas[0].Target.transform;
             MainCanvas = BaseMono.ExtralDatas[1].Target.GetComponent<Canvas>();
             PlayerCamera = BaseMono.ExtralDatas[2].Target;
-
+            _firstPanel = MainCanvas.transform.GetChild(0);
+            _secondPanel = MainCanvas.transform.GetChild(1);
             Debug.Log("HorseController Init !");
         }
 
@@ -88,16 +88,11 @@ namespace Dll_Project
       
         public override void Start()
         {
-            // PLEASE CHECK ROOM CONNECT FOR ME
-            RoomConnect();
-
-            Button SpeedUpBtn = MainCanvas.transform.GetChild(1).Find("SpeedBtn").GetComponent<Button>();
+            Button SpeedUpBtn = _secondPanel.Find("SpeedBtn").GetComponent<Button>();
             SpeedUpBtn.onClick.AddListener(() => 
             {
                 touchCount++;
             });
-           
-
 
             user_id = mStaticThings.I.mAvatarID;
             
@@ -116,13 +111,12 @@ namespace Dll_Project
                 _horsesInfo.Add(h_inf);
                 Doors.Add(BaseMono.ExtralDatas[3].Info[i].Target);
             }
-            MainCanvas.transform.GetChild(0).Find("JoinGame").GetComponent<Button>().onClick.AddListener(() =>
+            _firstPanel.Find("JoinGame").GetComponent<Button>().onClick.AddListener(() =>
             {
-                Debug.Log("fdssfff");
+                Debug.Log("JoinGame Clicked");
                 if(activePlayers == 0) { HostID = user_id; }
                 if (activePlayers <= 10)
                 {
-                    Transform _firstPanel = MainCanvas.transform.GetChild(0);
                     _firstPanel.Find("Rules").DOScaleX(0, 0.5f);
                     _firstPanel.Find("JoinGame").DOScaleX(0, 0.5f);
                     _firstPanel.Find("Timer").DOScaleX(1, 0.5f);
@@ -131,7 +125,7 @@ namespace Dll_Project
                     Debug.Log(mStaticThings.I.mAvatarID + " h_index: " + activePlayers);
 
                     myhorseIndex = activePlayers;
-                    Transform selectedhorse = HorseController._i.Horses[myhorseIndex];
+                    Transform selectedhorse = Horses[myhorseIndex];
                     GameStarted = true;
                     WsCChangeInfo _info = new WsCChangeInfo()
                     {
@@ -149,43 +143,36 @@ namespace Dll_Project
                 }
 
             }); 
-            MainCanvas.transform.GetChild(0).Find("JoinGame").gameObject.AddComponent<EventTrigger>();
+            _firstPanel.Find("JoinGame").gameObject.AddComponent<EventTrigger>();
             AddEventTrig(EventTriggerType.PointerEnter, () =>
             {
-                RawImage img = MainCanvas.transform.GetChild(0).Find("JoinGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
+                RawImage img = _firstPanel.Find("JoinGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
                 img.transform.DOScaleX(1, 0.2f);
             });
             AddEventTrig(EventTriggerType.PointerExit, () =>
             {
-                RawImage img = MainCanvas.transform.GetChild(0).Find("JoinGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
+                RawImage img = _firstPanel.Find("JoinGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
                 img.transform.DOScaleX(0, 0.2f);
-            }); 
-            
-        }
-        void AddEventTrig(EventTriggerType ET, UnityAction UA)
-        {
-            EventTrigger.TriggerEvent trigger = new EventTrigger.TriggerEvent();
-            trigger.AddListener((eventData) => UA()); // you can capture and pass the event data to the listener
+            });
 
-            // Create and initialise EventTrigger.Entry using the created TriggerEvent
-            EventTrigger.Entry entry = new EventTrigger.Entry() { callback = trigger, eventID = ET };
 
-            // Add the EventTrigger.Entry to delegates list on the EventTrigger
-            MainCanvas.transform.GetChild(0).Find("JoinGame").gameObject.GetComponent<EventTrigger>().triggers.Add(entry);
+            // PLEASE CHECK ROOM CONNECT FOR ME
+            RoomConnect();
+
         }
+        
+
         public override void Update()
         {
             if (GameStarted)
             {
-                Text SpeedText = MainCanvas.transform.GetChild(1).Find("Speed").GetComponent<Text>();
-                SpeedText.text = "Speed: " + (_horsesInfo[myhorseIndex].speed * 100);
+                Text SpeedText = _secondPanel.Find("Speed").GetComponent<Text>();
+                SpeedText.text = "Speed: " + (_horsesInfo[myhorseIndex].speed * 100);                
                 
-                PlayerCamera.localPosition = new Vector3(Horses[myhorseIndex].localPosition.x + 2, PlayerCamera.localPosition.y, PlayerCamera.localPosition.z);
+                PlayerCamera.localPosition = (Vector3.right * 2) + PlayerCamera.localPosition; ;
                 Debug.Log(HostID);
                 
-                Accelerate();
-                    
-                    
+                Accelerate(); 
                 
                 if (touchCount >= 10)
                 {
@@ -201,28 +188,20 @@ namespace Dll_Project
                         c = mStaticThings.I.mAvatarID,
                     };
                     MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ii);
-                    MainCanvas.transform.GetChild(1).Find("GameOver").DOScaleX(1, 0.2f);
+                    _secondPanel.Find("GameOver").DOScaleX(1, 0.2f);
                     GameStarted = false;
 
-                    MainCanvas.transform.GetChild(1).Find("GameOver").GetChild(0).GetComponent<Text>().text =
+                    _secondPanel.Find("GameOver").GetChild(0).GetComponent<Text>().text =
                         "比赛结束 \n 当前排名为：第 " + HorseController._i.WinnerList.Count + "名";
                     Transform cam = PlayerCamera;
                     cam.localPosition = new Vector3(-3.9f, cam.localPosition.y, cam.localPosition.z);
                 }
-
-
-
-
-
 
             }
         }
         public override void OnEnable()
         {
             Debug.Log("HorseController OnEnable !");
-            
-            
-           
         }
 
         public override void OnDisable()
@@ -235,23 +214,6 @@ namespace Dll_Project
         {
             Debug.LogWarning(other);
         }
-        void HoverIn()
-        {
-            RawImage img = MainCanvas.transform.GetChild(0).Find("JoinGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
-            img.transform.DOScaleX(1, 0.2f);
-            
-        }
-        void HoverOut()
-        {
-            RawImage img = MainCanvas.transform.GetChild(0).Find("JoinGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
-
-            img.transform.DOScaleX(0, 0.2f);
-
-        }
-        
-
-
-        
         void Accelerate()
         {
             if (mStaticThings.I.mAvatarID != HostID) { return; }
@@ -281,8 +243,7 @@ namespace Dll_Project
             WsCChangeInfo p = new WsCChangeInfo()
             {
                 a = "AddSpeed",
-                b = myhorseIndex.ToString(),
-                c= mStaticThings.I.mAvatarID
+                b = myhorseIndex.ToString(),                
             };
             MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), p);
         }
@@ -330,8 +291,8 @@ namespace Dll_Project
                 MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ms);
 
 
-                MainCanvas.transform.GetChild(1).gameObject.SetActive(true);
-                MainCanvas.transform.GetChild(0).Find("Timer").DOScaleX(0, 0.5f);
+                _secondPanel.gameObject.SetActive(true);
+                _firstPanel.Find("Timer").DOScaleX(0, 0.5f);
             
            
         }
@@ -342,6 +303,17 @@ namespace Dll_Project
             float zPos = Horses[_index].localPosition.z;
             
             PlayerCamera.localPosition = new Vector3 (PlayerCamera.transform.localPosition.x , PlayerCamera.localPosition.y, zPos);
+        }
+        void AddEventTrig(EventTriggerType ET, UnityAction UA)
+        {
+            EventTrigger.TriggerEvent trigger = new EventTrigger.TriggerEvent();
+            trigger.AddListener((eventData) => UA()); // you can capture and pass the event data to the listener
+
+            // Create and initialise EventTrigger.Entry using the created TriggerEvent
+            EventTrigger.Entry entry = new EventTrigger.Entry() { callback = trigger, eventID = ET };
+
+            // Add the EventTrigger.Entry to delegates list on the EventTrigger
+            _firstPanel.Find("JoinGame").gameObject.GetComponent<EventTrigger>().triggers.Add(entry);
         }
     }
 }
