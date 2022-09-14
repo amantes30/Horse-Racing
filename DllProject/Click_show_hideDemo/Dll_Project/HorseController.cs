@@ -192,7 +192,7 @@ namespace Dll_Project
                     GameStarted = false;
 
                     _secondPanel.Find("GameOver").GetChild(0).GetComponent<Text>().text =
-                        "比赛结束 \n 当前排名为：第 " + HorseController._i.WinnerList.Count + "名";
+                        "比赛结束 \n 当前排名为：第 " + WinnerList.Count + "名";
                     Transform cam = PlayerCamera;
                     cam.localPosition = new Vector3(-3.9f, cam.localPosition.y, cam.localPosition.z);
                 }
