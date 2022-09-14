@@ -62,7 +62,7 @@ namespace Dll_Project
         public bool ButtonPressed, GameStarted = false;
         public string req_inpt = string.Empty;
         public string HostID = "";
-        private string user_id;
+        public string user_id;
 
         public int myhorseIndex;
 

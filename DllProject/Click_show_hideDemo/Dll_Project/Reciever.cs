@@ -54,7 +54,7 @@ namespace Dll_Project
                 case "RoomConnected":
                     Debug.LogError("RoomConnected");
                     NewUserInfo _info;
-                    if (HostID != null)
+                    if (HostID != null && HostID == HorseController._i.user_id)
                     {
                         _info = new NewUserInfo() {
                             __horseinfo = HorseController._i._horsesInfo,
@@ -173,8 +173,9 @@ namespace Dll_Project
                     HorseController._i.Horses[int.Parse(ms.b)].GetComponent<Animator>().SetInteger("Speed", 1);
                     if (HorseController._i.WinnerList.Count == HorseController._i.activePlayers && game_started)
                     {
-                        canvas.transform.GetChild(1).Find("ResetButton").DOScaleX(1, 0.2f);
-                        canvas.transform.GetChild(1).Find("ResetButton").GetComponent<Button>().onClick.AddListener(() =>
+                        Button ResetBtn = canvas.transform.GetChild(1).Find("ResetButton").GetComponent<Button>();
+                        ResetBtn.transform.DOScaleX(1, 0.2f);
+                        ResetBtn.onClick.AddListener(() =>
                         {
                             mStaticThings.I.StartCoroutine(ResetGame());
                         });
@@ -186,7 +187,7 @@ namespace Dll_Project
 
                 case "AddSpeed":
                     int indexxx = int.Parse(ms.b);
-                    Transform _t = HorseController._i.Horses[HorseController._i._horsesInfo[indexxx].index];
+                    Transform _t = HorseController._i.Horses[indexxx];
                     HorseInfo _i = HorseController._i._horsesInfo[indexxx]; 
                     _i.speed += 0.01f;
                     if (mStaticThings.I.mAvatarID == HostID)
