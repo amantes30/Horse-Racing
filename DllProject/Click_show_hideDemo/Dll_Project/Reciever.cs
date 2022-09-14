@@ -138,7 +138,8 @@ namespace Dll_Project
                     
                             
                     mStaticThings.I.StartCoroutine(HorseController._i.StartCountdown(15));
-                    HorseController._i.Horses[index].GetComponent<Animator>().SetInteger("Speed", 1);
+                    Animator _animator = HorseController._i.Horses[index].GetComponent<Animator>();
+                    _animator.SetInteger("Speed", 1);
                            
                     mStaticThings.I.StartCoroutine(wait(5, HorseController._i.Horses[index]));
                     selectedInfo.ready = true;
@@ -149,11 +150,10 @@ namespace Dll_Project
                 case "StartGame":
                     bool canStart = false;
                     
-                    if (ms.b == HostID)
-                    {
-                        canStart = HorseController._i.activePlayers > 1 ? true : false;                                    
+                    
+                    canStart = int.Parse(ms.b) > 1 ? true : false;                                    
 
-                    }
+                    
                     Debug.Log(canStart);
                     if (canStart)
                     {
@@ -197,7 +197,7 @@ namespace Dll_Project
                             name =_t.name,
                             id = _i.user_id,
                             islocal = true,
-                            mark = "i",
+                            mark = "s",
                             position = _t.localPosition,
                             rotation = _t.localRotation,
                             scale = _t.localScale,

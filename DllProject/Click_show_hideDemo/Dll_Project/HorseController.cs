@@ -122,15 +122,17 @@ namespace Dll_Project
                 if(activePlayers == 0) { HostID = user_id; }
                 if (activePlayers <= 10)
                 {
-                    MainCanvas.transform.GetChild(0).Find("Rules").DOScaleX(0, 0.5f);
-                    MainCanvas.transform.GetChild(0).Find("JoinGame").DOScaleX(0, 0.5f);
-                    MainCanvas.transform.GetChild(0).Find("Timer").DOScaleX(1, 0.5f);
-                    Debug.Log(activePlayers.ToString());
-                    Debug.Log(mStaticThings.I.mAvatarID);
+                    Transform _firstPanel = MainCanvas.transform.GetChild(0);
+                    _firstPanel.Find("Rules").DOScaleX(0, 0.5f);
+                    _firstPanel.Find("JoinGame").DOScaleX(0, 0.5f);
+                    _firstPanel.Find("Timer").DOScaleX(1, 0.5f);
+
+                    
+                    Debug.Log(mStaticThings.I.mAvatarID + " h_index: " + activePlayers);
 
                     myhorseIndex = activePlayers;
                     Transform selectedhorse = HorseController._i.Horses[myhorseIndex];
-
+                    GameStarted = true;
                     WsCChangeInfo _info = new WsCChangeInfo()
                     {
                         a = "SelectHorse",
@@ -142,6 +144,7 @@ namespace Dll_Project
                 }
                 else if(activePlayers > 10)
                 {
+                    GameStarted = false;
                     // FULL,  WAIT FEW MINUTES UI
                 }
 
@@ -174,7 +177,8 @@ namespace Dll_Project
         {
             if (GameStarted)
             {
-                MainCanvas.transform.GetChild(1).Find("Speed").GetComponent<Text>().text = "Speed: " + (_horsesInfo[myhorseIndex].speed * 100);
+                Text SpeedText = MainCanvas.transform.GetChild(1).Find("Speed").GetComponent<Text>();
+                SpeedText.text = "Speed: " + (_horsesInfo[myhorseIndex].speed * 100);
                 
                 PlayerCamera.localPosition = new Vector3(Horses[myhorseIndex].localPosition.x + 2, PlayerCamera.localPosition.y, PlayerCamera.localPosition.z);
                 Debug.Log(HostID);
@@ -250,10 +254,11 @@ namespace Dll_Project
         
         void Accelerate()
         {
+            if (mStaticThings.I.mAvatarID != HostID) { return; }
            Debug.Log("ACCCCCCC");
            foreach (HorseInfo i in _horsesInfo)
             {
-                if (i.selcted && i.ready && mStaticThings.I.mAvatarID == HostID)
+                if (i.selcted && i.ready)
                 {                    
                     Horses[i.index].Translate(Vector3.forward * i.speed);
                     WsMovingObj _mov = new WsMovingObj() 
@@ -310,8 +315,8 @@ namespace Dll_Project
 
                 currCountdownValue--;
             }
-            if (GameStarted)
-            {
+            
+           
                 PlayerCamera.gameObject.SetActive(true);
                 mStaticThings.I.IsThirdCamera = true;
                 mStaticThings.I.PCCamra = PlayerCamera;
@@ -320,18 +325,15 @@ namespace Dll_Project
                 WsCChangeInfo ms = new WsCChangeInfo
                 {
                     a = "StartGame",
-                    b = mStaticThings.I.mAvatarID
+                    b = activePlayers.ToString(),
                 };
                 MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ms);
 
 
                 MainCanvas.transform.GetChild(1).gameObject.SetActive(true);
                 MainCanvas.transform.GetChild(0).Find("Timer").DOScaleX(0, 0.5f);
-            }
-            else
-            {
-                mStaticThings.I.StartCoroutine( StartCountdown(15));
-            }
+            
+           
         }
 
         void PositionCamera(int _index)
