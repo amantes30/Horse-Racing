@@ -236,8 +236,6 @@ namespace Dll_Project
                 {
                     
                     Transform _t = HorseController._i.Horses[i.index];
-                    
-                    HorseInfo _info = HorseController._i._horsesInfo[i.index];
                     i.speed += 0.05f;
                     _t.GetComponent<Animator>().SetInteger("Speed", 2);
                     
@@ -253,7 +251,7 @@ namespace Dll_Project
                     };
                     MessageDispatcher.SendMessageData(WsMessageType.SendMovingObj.ToString(), _mov);
 
-                    //selectedhorse.GetChild(3).GetChild(0).GetChild(3).GetComponent<Text>().text = "当前播放";//playing
+                 
 
                 }
 
@@ -286,8 +284,7 @@ namespace Dll_Project
 
                 i.selcted = false;
                 i.ready = false;
-                i.speed = 0;
-                i.touchCount = 0;
+                i.speed = 0;                
                 i.user_id = "";
                
             }

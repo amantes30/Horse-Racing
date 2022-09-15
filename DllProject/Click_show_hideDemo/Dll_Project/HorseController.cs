@@ -28,7 +28,7 @@ public class HorseInfo
     public string user_id { get; set; }
     public bool selcted, ready= false;    
     public int index;
-    public int touchCount;
+    
     public float speed = 0;
     
 }
@@ -104,8 +104,7 @@ namespace Dll_Project
                 HorseInfo h_inf = new HorseInfo {
                     index = i,
                     selcted = false,
-                    user_id = "",
-                    touchCount = 0,
+                    user_id = "",                    
                     speed = 0,
                 };
                 _horsesInfo.Add(h_inf);
