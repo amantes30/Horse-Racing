@@ -58,7 +58,7 @@ namespace Dll_Project
                 case "RoomConnected":
                     Debug.LogError("RoomConnected");
                     NewUserInfo _info;
-                    if (HostID != null && HostID == HorseController._i.user_id)
+                    if (HostID == HorseController._i.user_id)
                     {
                         _info = new NewUserInfo() {
                             __horseinfo = HorseController._i._horsesInfo,
@@ -130,8 +130,10 @@ namespace Dll_Project
                     if (mStaticThings.I.mAvatarID == ms.c)
                     {                        
                         index = int.Parse(ms.b);
-                        selectedInfo = HorseController._i._horsesInfo[index];                        
+                        selectedInfo = HorseController._i._horsesInfo[index];   
+                        
                     }
+                    if (index == 0) { HostID = mStaticThings.I.mAvatarID; }
                     selectedInfo.selcted = true;
                     selectedInfo.user_id = ms.c;
                     selectedInfo.index = index;
