@@ -84,6 +84,7 @@ namespace Dll_Project
         public override void Awake()
         {
             Debug.Log("HorseController Awake !");            
+                       
         }      
       
         public override void Start()
@@ -95,7 +96,9 @@ namespace Dll_Project
             });
 
             user_id = mStaticThings.I.mAvatarID;
-            
+
+            // PLEASE CHECK ROOM CONNECT FOR ME
+            RoomConnect();
             // INITIALIZE HORSES AND HORSE STATUS IN A LIST
             for (int i = 0; i < table.childCount - 1; i++)
             {
@@ -127,12 +130,14 @@ namespace Dll_Project
                     myhorseIndex = activePlayers;
                     Transform selectedhorse = Horses[myhorseIndex];
                     GameStarted = true;
+                    activePlayers += 1;
                     WsCChangeInfo _info = new WsCChangeInfo()
                     {
                         a = "SelectHorse",
                         b = myhorseIndex.ToString(),
                         c = user_id,
                         d = HostID,
+                        e = activePlayers.ToString()
                     };
                     MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), _info);
                 }
@@ -155,9 +160,7 @@ namespace Dll_Project
                 img.transform.DOScaleX(0, 0.2f);
             });
 
-
-            // PLEASE CHECK ROOM CONNECT FOR ME
-            RoomConnect();
+            
 
         }
         
@@ -167,9 +170,9 @@ namespace Dll_Project
             if (GameStarted)
             {
                 Text SpeedText = _secondPanel.Find("Speed").GetComponent<Text>();
-                SpeedText.text = "Speed: " + (_horsesInfo[myhorseIndex].speed * 100);                
+                SpeedText.text = "Speed: " + (_horsesInfo[myhorseIndex].speed);                
                 
-                PlayerCamera.localPosition = (Vector3.right * 2) + PlayerCamera.localPosition; ;
+               PlayerCamera.localPosition =new Vector3(Horses[myhorseIndex].localPosition.x + 2, 161.953f ,PlayerCamera.localPosition.z); 
                 Debug.Log(HostID);
                 
                 Accelerate(); 
@@ -269,18 +272,21 @@ namespace Dll_Project
             while (currCountdownValue >= 0)
             {
                 MainCanvas.transform.GetChild(0).Find("Timer").GetComponent<Text>().text =
-                    "目前玩家" + activePlayers.ToString() + "人，游戏还剩" + currCountdownValue.ToString() + "秒开始";
+                    "目前玩家" + activePlayers + "人，游戏还剩" + currCountdownValue.ToString() + "秒开始";
                 currCountdownValue.ToString();
-                //Debug.Log("Countdown: " + currCountdownValue);
-                yield return new WaitForSeconds(1.0f);
-
+                Debug.Log("Countdown: " + currCountdownValue);
+                yield return new WaitForSecondsRealtime(1.0f);
+              
                 currCountdownValue--;
+                
             }
-            
-           
-                PlayerCamera.gameObject.SetActive(true);
-                mStaticThings.I.IsThirdCamera = true;
-                mStaticThings.I.PCCamra = PlayerCamera;
+            if (activePlayers <= 1)
+            {
+                currCountdownValue = 15;
+            }
+            PlayerCamera.gameObject.SetActive(true);
+               
+                
                 PositionCamera(myhorseIndex);
                 Debug.Log("DONEEE");
                 WsCChangeInfo ms = new WsCChangeInfo
@@ -302,7 +308,8 @@ namespace Dll_Project
             PlayerCamera.gameObject.SetActive(true);
             float zPos = Horses[_index].localPosition.z;
             
-            PlayerCamera.localPosition = new Vector3 (PlayerCamera.transform.localPosition.x , PlayerCamera.localPosition.y, zPos);
+            PlayerCamera.localPosition = new Vector3 (PlayerCamera.transform.localPosition.x , 162.5f, zPos);
+           
         }
         void AddEventTrig(EventTriggerType ET, UnityAction UA)
         {

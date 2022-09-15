@@ -97,6 +97,7 @@ namespace Dll_Project
                                     b = i.index.ToString(),
                                     c = i.user_id,
                                     d = HostID,
+                                    e = p.activeUsers.ToString()
                                 };
                                 MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), io);
                             }
@@ -135,7 +136,8 @@ namespace Dll_Project
                     selectedInfo.user_id = ms.c;
                     selectedInfo.index = index;
                     HorseController._i._horsesInfo[index] = selectedInfo;
-                    HorseController._i.activePlayers++;
+                    HorseController._i.activePlayers = int.Parse(ms.e);
+                    Debug.LogError(HorseController._i.activePlayers);
 
                     Animator DoorAnimator = HorseController._i.Doors[index].GetComponent<Animator>();
                     DoorAnimator.SetTrigger("isOpen");
@@ -164,10 +166,11 @@ namespace Dll_Project
                         StartGame();
                         HorseController._i.GameStarted = true;
                         game_started = true;
+                        
                     }
                     else if (!canStart)
                     {
-                        mStaticThings.I.StartCoroutine(HorseController._i.StartCountdown(15));
+                        //mStaticThings.I.StartCoroutine(HorseController._i.StartCountdown(15));
                         Debug.Log("WAITING FOR OTHER PLAYERS");
                     }
                     break;
@@ -234,7 +237,7 @@ namespace Dll_Project
                 }
                 else
                 {
-                    
+                    _firstPanel.Find("RawImage").DOScaleX(1, 0.2f);
                     Transform _t = HorseController._i.Horses[i.index];
                     
                     HorseInfo _info = HorseController._i._horsesInfo[i.index];
