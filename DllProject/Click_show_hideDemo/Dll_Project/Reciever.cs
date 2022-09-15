@@ -84,16 +84,7 @@ namespace Dll_Project
                             if (i.selcted)
                             {
                                 Transform _tt = HorseController._i.Horses[i.index];
-                                WsMovingObj _movv = new WsMovingObj()
-                                {
-                                    id = ms.b,
-                                    islocal = true,
-                                    mark = "s",
-                                    name = _tt.name,
-                                    position = _tt.localPosition,
-                                    rotation = _tt.localRotation,
-                                    scale = _tt.localScale,
-                                }; MessageDispatcher.SendMessageData(WsMessageType.SendMovingObj.ToString(), _movv);
+                                SendPosition(_tt, "s");
                             }
                         }
                     }
@@ -144,46 +135,70 @@ namespace Dll_Project
                
 
                     
-                case "SelectHorse":                   
+                case "SelectHorse":
+
                     
-                    HorseInfo selectedInfo = new HorseInfo(); 
-                    int index = 0;
+                    int _index = 0;
                                            
-                    index = int.Parse(ms.b);
-                    selectedInfo = HorseController._i._horsesInfo[index];   
-                        
-                    
-                    if (index == 0) { HostID = mStaticThings.I.mAvatarID; }
-                    selectedInfo.selcted = true;
-                    selectedInfo.user_id = ms.c;
-                    selectedInfo.index = index;
-                    HorseController._i._horsesInfo[index] = selectedInfo;
+                    _index = int.Parse(ms.b);
+                    HorseInfo selectedInfo = new HorseInfo()
+                    {
+                        selcted = true,
+                        user_id = ms.c,
+                        index = _index,                        
+                    };
+                    HostID = ms.d;                    
+                    HorseController._i._horsesInfo[_index] = selectedInfo;
                     HorseController._i.activePlayers = int.Parse(ms.e);
+                    HorseController._i.activePlayers++;
                     Debug.LogError(HorseController._i.activePlayers);
 
-                    Animator DoorAnimator = HorseController._i.Doors[index].GetComponent<Animator>();
+                    Animator DoorAnimator = HorseController._i.Doors[_index].GetComponent<Animator>();
                     DoorAnimator.SetTrigger("isOpen");
-                    foreach (HorseInfo i in HorseController._i._horsesInfo)
+                    
+                    if (ms.c == HostID)
                     {
-                        if (i.selcted)
-                        {
-                            mStaticThings.I.StartCoroutine(HorseController._i.StartCountdown(15));
-                        }
+                        mStaticThings.I.StartCoroutine(HorseController._i.StartCountdown(15));
+                            
                     }
                     
+                    
 
-                    Animator h_animator = HorseController._i.Horses[index].GetComponent<Animator>();
+                    Animator h_animator = HorseController._i.Horses[_index].GetComponent<Animator>();
                     h_animator.SetInteger("Speed", 1);
                            
-                    mStaticThings.I.StartCoroutine(wait(5, HorseController._i.Horses[index]));
+                    mStaticThings.I.StartCoroutine(wait(5, HorseController._i.Horses[_index]));
                     selectedInfo.ready = true;
                     
                     
                     Debug.Log("select Message");
                     break;
-                case "StartGame":                  
-                   
-                        StartGame();
+                case "countdown":
+                    int currCountdownValue = int.Parse(ms.b);
+                    int activePlayers = int.Parse(ms.c);
+                    foreach (HorseInfo i in HorseController._i._horsesInfo)
+                    {
+                        if (i.selcted)
+                        {
+
+                            _firstPanel.Find("Timer").GetComponent<Text>().text =
+                            "目前玩家" + activePlayers + "人，游戏还剩 " + currCountdownValue + " 秒开始";
+                        }
+
+                    }
+                    break;
+                case "StartGame":
+                    _secondPanel.gameObject.SetActive(true);
+                    _firstPanel.Find("Timer").DOScaleX(0, 0.5f);
+                    foreach (HorseInfo i in HorseController._i._horsesInfo)
+                    {
+                        if (i.selcted && mStaticThings.I.mAvatarID == i.user_id)
+                        {
+                            HorseController._i.PositionCamera(i.index);
+                        }
+                    }
+                        
+                    StartGame();
                    
                    
                         
@@ -209,27 +224,14 @@ namespace Dll_Project
                 
 
                 case "AddSpeed":
-                    int indexxx = int.Parse(ms.b);
-                    Transform _t = HorseController._i.Horses[indexxx];
-                    HorseInfo _i = HorseController._i._horsesInfo[indexxx]; 
-                    _i.speed += 0.01f;
+                   
                     if (mStaticThings.I.mAvatarID == HostID)
                     {
-                       
-                        WsMovingObj _mov = new WsMovingObj() 
-                        {
-                            name =_t.name,
-                            id = _i.user_id,
-                            islocal = true,
-                            mark = "s",
-                            position = _t.localPosition,
-                            rotation = _t.localRotation,
-                            scale = _t.localScale,
-                        };
-                        MessageDispatcher.SendMessageData(WsMessageType.SendMovingObj.ToString(), _mov);
-                            
-                        
-                        
+                        int indexxx = int.Parse(ms.b);
+                        Transform _t = HorseController._i.Horses[indexxx];
+                        HorseInfo _i = HorseController._i._horsesInfo[indexxx];
+                        _i.speed += 0.01f;
+                        SendPosition(_t, "s");
                     }
                     break;
                 
@@ -244,41 +246,45 @@ namespace Dll_Project
         {
             HorseController._i.GameStarted = true;
             game_started = true;
+
+            Transform _horseObj;
             foreach (HorseInfo i in HorseController._i._horsesInfo)
             {
+                _horseObj = HorseController._i.Horses[i.index];
                 if (!i.selcted)
                 {
-                    HorseController._i.Horses[i.index].gameObject.SetActive(false);
+                    _horseObj.gameObject.SetActive(false);
 
                 }
                 else
                 {
                     _firstPanel.Find("RawImage").DOScaleX(1, 0.2f);
-                    Transform _t = HorseController._i.Horses[i.index];
-                    i.speed += 0.05f;
-                    _t.GetComponent<Animator>().SetInteger("Speed", 2);
                     
-                    WsMovingObj _mov = new WsMovingObj()
-                    {
-                        id = HostID,
-                        islocal = true,
-                        position = _t.localPosition,
-                        rotation = _t.localRotation,
-                        scale = _t.localScale,
-                        mark = "s",
-                        name = _t.name,
-                    };
-                    MessageDispatcher.SendMessageData(WsMessageType.SendMovingObj.ToString(), _mov);
+                    i.speed += 0.05f;
+                    _horseObj.GetComponent<Animator>().SetInteger("Speed", 2);
 
-                 
-
+                    SendPosition(_horseObj, "s");
                 }
 
 
             }
             
         }
+        void SendPosition(Transform _t, string _mark)
+        {
+            WsMovingObj _mov = new WsMovingObj()
+            {
+                id = HostID,
+                islocal = true,
+                position = _t.localPosition,
+                rotation = _t.localRotation,
+                scale = _t.localScale,
+                mark = _mark,
+                name = _t.name,
+            };
+            MessageDispatcher.SendMessageData(WsMessageType.SendMovingObj.ToString(), _mov);
 
+        }
         IEnumerator ResetGame()
         {
             //HorseController._i.Horses[y.index].GetComponent<Animator>().SetInteger("Speed", 1);

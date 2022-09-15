@@ -90,77 +90,19 @@ namespace Dll_Project
         public override void Start()
         {
             Button SpeedUpBtn = _secondPanel.Find("SpeedBtn").GetComponent<Button>();
-            SpeedUpBtn.onClick.AddListener(() => 
-            {
-                touchCount++;
-            });
+            SpeedUpBtn.onClick.AddListener(() => { touchCount++; });
 
-            user_id = mStaticThings.I.mAvatarID;
-
-            // PLEASE CHECK ROOM CONNECT FOR ME
-            RoomConnect();
-            // INITIALIZE HORSES AND HORSE STATUS IN A LIST
-            for (int i = 0; i < table.childCount - 1; i++)
+            if (mStaticThings.I != null && !mStaticThings.I.isVRApp)
             {
-                
-                Horses.Add(table.GetChild(i));
-                HorseInfo h_inf = new HorseInfo {
-                    index = i,
-                    selcted = false,
-                    user_id = "",                    
-                    speed = 0,
-                };
-                _horsesInfo.Add(h_inf);
-                Doors.Add(BaseMono.ExtralDatas[3].Info[i].Target);
+                user_id = mStaticThings.I.mAvatarID;
             }
-            _firstPanel.Find("JoinGame").GetComponent<Button>().onClick.AddListener(() =>
-            {
-                Debug.Log("JoinGame Clicked");
-                if(activePlayers == 0) { HostID = user_id; }
-                if (activePlayers <= 10)
-                {
-                    _firstPanel.Find("Rules").DOScaleX(0, 0.5f);
-                    _firstPanel.Find("JoinGame").DOScaleX(0, 0.5f);
-                    _firstPanel.Find("Timer").DOScaleX(1, 0.5f);
 
-                    
-                    Debug.Log(mStaticThings.I.mAvatarID + " h_index: " + activePlayers);
+            RoomConnect();
 
-                    myhorseIndex = activePlayers;
-                    Transform selectedhorse = Horses[myhorseIndex];
-                    GameStarted = true;
-                    activePlayers += 1;
-                    WsCChangeInfo _info = new WsCChangeInfo()
-                    {
-                        a = "SelectHorse",
-                        b = myhorseIndex.ToString(),
-                        c = user_id,
-                        d = HostID,
-                        e = activePlayers.ToString()
-                    };
-                    MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), _info);
-                }
-                else if(activePlayers > 10)
-                {
-                    GameStarted = false;
-                    // FULL,  WAIT FEW MINUTES UI
-                }
+            // INITIALIZE HORSES AND HORSE STATUS IN A LIST
+            InitializeLists();
 
-            }); 
-            _firstPanel.Find("JoinGame").gameObject.AddComponent<EventTrigger>();
-            AddEventTrig(EventTriggerType.PointerEnter, () =>
-            {
-                RawImage img = _firstPanel.Find("JoinGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
-                img.transform.DOScaleX(1, 0.2f);
-            });
-            AddEventTrig(EventTriggerType.PointerExit, () =>
-            {
-                RawImage img = _firstPanel.Find("JoinGame").GetChild(0).GetChild(0).GetComponent<RawImage>();
-                img.transform.DOScaleX(0, 0.2f);
-            });
-
-            
-
+            _firstPanel.Find("JoinGame").GetComponent<Button>().onClick.AddListener(JoinGame);
         }
         
 
@@ -171,7 +113,7 @@ namespace Dll_Project
                 Text SpeedText = _secondPanel.Find("Speed").GetComponent<Text>();
                 SpeedText.text = "Speed: " + (_horsesInfo[myhorseIndex].speed);                
                 
-               PlayerCamera.localPosition =new Vector3(Horses[myhorseIndex].localPosition.x + 2, 161.953f ,PlayerCamera.localPosition.z); 
+                PlayerCamera.localPosition =new Vector3(Horses[myhorseIndex].localPosition.x + 2, 161.953f ,PlayerCamera.localPosition.z); 
                 Debug.Log(HostID);
                 
                 Accelerate(); 
@@ -190,7 +132,8 @@ namespace Dll_Project
                         c = mStaticThings.I.mAvatarID,
                     };
                     MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ii);
-                    _secondPanel.Find("GameOver").DOScaleX(1, 0.2f);
+                    Transform GameOverImage = _secondPanel.Find("GameOver");
+                    GameOverImage.DOScaleX(1, 0.2f);
                     GameStarted = false;
 
                     _secondPanel.Find("GameOver").GetChild(0).GetComponent<Text>().text =
@@ -207,24 +150,14 @@ namespace Dll_Project
             }
             
         }
-        public override void OnEnable()
-        {
-            Debug.Log("HorseController OnEnable !");
-        }
+        public override void OnEnable() => Debug.Log("HorseController OnEnable !");
 
-        public override void OnDisable()
-        {
-            Debug.Log("HorseController OnDisable !");
-            
-        }
+        public override void OnDisable() => Debug.Log("HorseController OnDisable !");
 
-        public override void OnTriggerEnter(Collider other)
-        {
-            Debug.LogWarning(other);
-        }
+        public override void OnTriggerEnter(Collider other) => Debug.LogWarning(other);
         void Accelerate()
         {
-            if (mStaticThings.I.mAvatarID != HostID) { return; }
+           if (mStaticThings.I.mAvatarID != HostID) { return; }
            Debug.Log("ACCCCCCC");
            foreach (HorseInfo i in _horsesInfo)
             {
@@ -279,14 +212,22 @@ namespace Dll_Project
 
            
             while (currCountdownValue >= 0)
+            {
+                if (activePlayers > 1)
                 {
-                    _firstPanel.Find("Timer").GetComponent<Text>().text =
-                        "目前玩家" + activePlayers + "人，游戏还剩 " + currCountdownValue + " 秒开始";
+                    WsCChangeInfo _in = new WsCChangeInfo()
+                    {
+                        a = "countdown",
+                        b = currCountdownValue.ToString(),
+                        c = activePlayers.ToString(),
+                    };
+                    MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), _in);
+                }
 
-                    Debug.Log("Countdown: " + currCountdownValue);
-                    yield return new WaitForSeconds(1.0f);
+                Debug.Log("Countdown: " + currCountdownValue);
+                yield return new WaitForSeconds(1.0f);
 
-                    currCountdownValue--;
+                currCountdownValue--;
 
                 
             }
@@ -298,9 +239,7 @@ namespace Dll_Project
             }
             else if(activePlayers >1)
             {
-                _secondPanel.gameObject.SetActive(true);
-                _firstPanel.Find("Timer").DOScaleX(0, 0.5f);
-                PositionCamera(myhorseIndex); 
+                 
                 Debug.Log("DONEEE");
                 WsCChangeInfo ms = new WsCChangeInfo
                 {
@@ -309,17 +248,61 @@ namespace Dll_Project
                 };
                 MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ms);
             }
-            
-
-           
-
-
-                
-            
-           
         }
 
-        void PositionCamera(int _index)
+        // Join Game Button
+        void JoinGame()
+        {
+            Debug.Log("JoinGame Clicked");
+            if (activePlayers == 0) { HostID = user_id; }
+            if (activePlayers <= 10)
+            {
+                _firstPanel.Find("Rules").DOScaleX(0, 0.5f);
+                _firstPanel.Find("JoinGame").DOScaleX(0, 0.5f);
+                _firstPanel.Find("Timer").DOScaleX(1, 0.5f);
+
+
+                Debug.Log(mStaticThings.I.mAvatarID + " h_index: " + activePlayers);
+
+                myhorseIndex = activePlayers;
+                GameStarted = true;
+
+                WsCChangeInfo _info = new WsCChangeInfo()
+                {
+                    a = "SelectHorse",
+                    b = myhorseIndex.ToString(),
+                    c = user_id,
+                    d = HostID,
+                    e = activePlayers.ToString()
+                };
+                MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), _info);
+            }
+            else if (activePlayers > 10)
+            {
+                GameStarted = false;
+                Debug.Log("WAITTTT");
+                // FULL,  WAIT FEW MINUTES UI
+            }
+
+        }
+        // Get HorseObjects, gates, and save their status
+        void InitializeLists()
+        {
+            for (int i = 0; i < table.childCount - 1; i++)
+            {
+                Horses.Add(table.GetChild(i));
+                HorseInfo h_inf = new HorseInfo
+                {
+                    index = i,
+                    selcted = false,
+                    user_id = "",
+                    speed = 0,
+                };
+                _horsesInfo.Add(h_inf);
+                Doors.Add(BaseMono.ExtralDatas[3].Info[i].Target);
+            }
+        }
+        public void PositionCamera(int _index)
         {
             PlayerCamera.gameObject.SetActive(true);
             float zPos = Horses[_index].localPosition.z;
@@ -327,16 +310,6 @@ namespace Dll_Project
             PlayerCamera.localPosition = new Vector3 (PlayerCamera.transform.localPosition.x , 162.5f, zPos);
            
         }
-        void AddEventTrig(EventTriggerType ET, UnityAction UA)
-        {
-            EventTrigger.TriggerEvent trigger = new EventTrigger.TriggerEvent();
-            trigger.AddListener((eventData) => UA()); // you can capture and pass the event data to the listener
-
-            // Create and initialise EventTrigger.Entry using the created TriggerEvent
-            EventTrigger.Entry entry = new EventTrigger.Entry() { callback = trigger, eventID = ET };
-
-            // Add the EventTrigger.Entry to delegates list on the EventTrigger
-            _firstPanel.Find("JoinGame").gameObject.GetComponent<EventTrigger>().triggers.Add(entry);
-        }
+        
     }
 }
