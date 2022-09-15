@@ -1,8 +1,12 @@
 ﻿using com.ootii.Messages;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using LitJson;
+using UnityEngine.EventSystems;
+using UnityEngine.Events;
+using System.Collections;
 using DG.Tweening;
 namespace Dll_Project
 {
@@ -60,7 +64,8 @@ namespace Dll_Project
                     NewUserInfo _info;
                     if (HostID == HorseController._i.user_id)
                     {
-                        _info = new NewUserInfo() {
+                        _info = new NewUserInfo()
+                        {
                             __horseinfo = HorseController._i._horsesInfo,
                             _gameStarted = HorseController._i.GameStarted,
                             _hostID = HorseController._i.HostID,
@@ -74,14 +79,32 @@ namespace Dll_Project
                             c = ms.b,
                         };
                         MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ii);
+                        foreach (HorseInfo i in HorseController._i._horsesInfo)
+                        {
+                            if (i.selcted)
+                            {
+                                Transform _tt = HorseController._i.Horses[i.index];
+                                WsMovingObj _movv = new WsMovingObj()
+                                {
+                                    id = ms.b,
+                                    islocal = true,
+                                    mark = "s",
+                                    name = _tt.name,
+                                    position = _tt.localPosition,
+                                    rotation = _tt.localRotation,
+                                    scale = _tt.localScale,
+                                }; MessageDispatcher.SendMessageData(WsMessageType.SendMovingObj.ToString(), _movv);
+                            }
+                        }
                     }
-
 
 
                     break;
                 case "ForNewUser":
+
                     if (mStaticThings.I.mAvatarID == ms.c)
                     {
+                        List<Transform> newUserHorses = HorseController._i.Horses;
                         NewUserInfo p = JsonMapper.ToObject<NewUserInfo>(ms.b);
                         HorseController._i._horsesInfo = p.__horseinfo;
                         HorseController._i.GameStarted = p._gameStarted;
@@ -91,15 +114,13 @@ namespace Dll_Project
                         {
                             if (i.selcted)
                             {
-                                WsCChangeInfo io = new WsCChangeInfo()
-                                {
-                                    a = "SelectHorse",
-                                    b = i.index.ToString(),
-                                    c = i.user_id,
-                                    d = HostID,
-                                    e = p.activeUsers.ToString()
-                                };
-                                MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), io);
+                                HorseController._i._horsesInfo[i.index] = i;
+                                HorseController._i.activePlayers = int.Parse(ms.e);
+                                Debug.LogError(HorseController._i.activePlayers);
+
+                                Animator _DoorAnimator = HorseController._i.Doors[i.index].GetComponent<Animator>();
+                                _DoorAnimator.SetTrigger("isOpen");
+                                
                             }
                         }
                         if (p._gameStarted)
@@ -127,12 +148,11 @@ namespace Dll_Project
                     
                     HorseInfo selectedInfo = new HorseInfo(); 
                     int index = 0;
-                    if (mStaticThings.I.mAvatarID == ms.c)
-                    {                        
-                        index = int.Parse(ms.b);
-                        selectedInfo = HorseController._i._horsesInfo[index];   
+                                           
+                    index = int.Parse(ms.b);
+                    selectedInfo = HorseController._i._horsesInfo[index];   
                         
-                    }
+                    
                     if (index == 0) { HostID = mStaticThings.I.mAvatarID; }
                     selectedInfo.selcted = true;
                     selectedInfo.user_id = ms.c;
@@ -143,8 +163,14 @@ namespace Dll_Project
 
                     Animator DoorAnimator = HorseController._i.Doors[index].GetComponent<Animator>();
                     DoorAnimator.SetTrigger("isOpen");
-
-                    mStaticThings.I.StartCoroutine(HorseController._i.StartCountdown(15));
+                    foreach (HorseInfo i in HorseController._i._horsesInfo)
+                    {
+                        if (i.selcted)
+                        {
+                            mStaticThings.I.StartCoroutine(HorseController._i.StartCountdown(15));
+                        }
+                    }
+                    
 
                     Animator h_animator = HorseController._i.Horses[index].GetComponent<Animator>();
                     h_animator.SetInteger("Speed", 1);
@@ -155,26 +181,13 @@ namespace Dll_Project
                     
                     Debug.Log("select Message");
                     break;
-                case "StartGame":
-                    bool canStart = false;
-                    
-                    
-                    canStart = int.Parse(ms.b) > 1 ? true : false;                                    
-
-                    
-                    Debug.Log(canStart);
-                    if (canStart)
-                    {
+                case "StartGame":                  
+                   
                         StartGame();
-                        HorseController._i.GameStarted = true;
-                        game_started = true;
+                   
+                   
                         
-                    }
-                    else if (!canStart)
-                    {
-                        //mStaticThings.I.StartCoroutine(HorseController._i.StartCountdown(15));
-                        Debug.Log("WAITING FOR OTHER PLAYERS");
-                    }
+                  
                     break;
                 case "Finished":                    
                     
@@ -229,7 +242,8 @@ namespace Dll_Project
         }
         void StartGame()
         {
-            
+            HorseController._i.GameStarted = true;
+            game_started = true;
             foreach (HorseInfo i in HorseController._i._horsesInfo)
             {
                 if (!i.selcted)

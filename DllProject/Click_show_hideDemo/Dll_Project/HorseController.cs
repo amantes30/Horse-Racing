@@ -164,7 +164,7 @@ namespace Dll_Project
         }
         
 
-        public override void Update()
+        public override void FixedUpdate()
         {
             if (GameStarted)
             {
@@ -200,6 +200,12 @@ namespace Dll_Project
                 }
 
             }
+            if(activePlayers > 2)
+            {
+                MainCanvas.transform.GetChild(0).Find("Timer").GetComponent<Text>().text =
+                       "目前玩家" + activePlayers + "人，游戏还剩" + currCountdownValue.ToString() + "秒开始";
+            }
+            
         }
         public override void OnEnable()
         {
@@ -268,25 +274,33 @@ namespace Dll_Project
         public IEnumerator StartCountdown(float countdownValue)
         {
             currCountdownValue = countdownValue;
-            while (currCountdownValue >= 0)
-            {
-                MainCanvas.transform.GetChild(0).Find("Timer").GetComponent<Text>().text =
-                    "目前玩家" + activePlayers + "人，游戏还剩" + currCountdownValue.ToString() + "秒开始";
-                currCountdownValue.ToString();
-                Debug.Log("Countdown: " + currCountdownValue);
-                yield return new WaitForSecondsRealtime(1.0f);
-              
-                currCountdownValue--;
-                
-            }
-            if (activePlayers <= 1)
-            {
-                currCountdownValue = 15;
-            }
             PlayerCamera.gameObject.SetActive(true);
-               
+            
+
+           
+            while (currCountdownValue >= 0)
+                {
+                    _firstPanel.Find("Timer").GetComponent<Text>().text =
+                        "目前玩家" + activePlayers + "人，游戏还剩 " + currCountdownValue + " 秒开始";
+
+                    Debug.Log("Countdown: " + currCountdownValue);
+                    yield return new WaitForSeconds(1.0f);
+
+                    currCountdownValue--;
+
                 
-                PositionCamera(myhorseIndex);
+            }
+            Debug.Log(activePlayers);
+           if (activePlayers <= 1 && currCountdownValue<0) {
+                _firstPanel.Find("wait").DOScaleX(1, 0.2f);
+                Debug.Log("WAITING FOR OTHER PLAYERS");
+                
+            }
+            else if(activePlayers >1)
+            {
+                _secondPanel.gameObject.SetActive(true);
+                _firstPanel.Find("Timer").DOScaleX(0, 0.5f);
+                PositionCamera(myhorseIndex); 
                 Debug.Log("DONEEE");
                 WsCChangeInfo ms = new WsCChangeInfo
                 {
@@ -294,10 +308,13 @@ namespace Dll_Project
                     b = activePlayers.ToString(),
                 };
                 MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ms);
+            }
+            
+
+           
 
 
-                _secondPanel.gameObject.SetActive(true);
-                _firstPanel.Find("Timer").DOScaleX(0, 0.5f);
+                
             
            
         }
