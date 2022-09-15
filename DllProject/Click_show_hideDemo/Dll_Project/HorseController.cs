@@ -4,31 +4,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using LitJson;
-using UnityEngine.EventSystems;
-using UnityEngine.Events;
-using System.Collections;
+
 using DG.Tweening;
 
-/*
- * ReadMe
- * 
- * for unity scene
- *      the horses need to be child object of the Table object
- *          horses need to have the animator component
- * 
- *      the maincanvas is the canvas that user interacts with to start game
- *      Rename this objects in the scene
- *          button to start game = "StartGame"
- *          timer text when the game starts = "Timer"
- *          speed text when the game starts = "Speed"
- * 
- */
 public class HorseInfo
 {
     public string user_id { get; set; }
     public bool selcted, ready= false;    
-    public int index;
-    
+    public int index;    
     public float speed = 0;
     
 }
@@ -60,13 +43,12 @@ namespace Dll_Project
         public List<Transform> Doors = new List<Transform>();
 
         public int activePlayers = 0;
-        public int myhorseIndex;
-        public int touchCount;
+        public int myhorseIndex = 0;
+        public int touchCount = 0;
 
-        public bool ButtonPressed, GameStarted = false;
+        public bool GameStarted = false;
 
-        public string req_inpt = string.Empty;
-        public string HostID = "";
+        public string HostID;
         public string user_id;
 
         // WIN POSX -417
@@ -90,7 +72,7 @@ namespace Dll_Project
         public override void Start()
         {
             Button SpeedUpBtn = _secondPanel.Find("SpeedBtn").GetComponent<Button>();
-            SpeedUpBtn.onClick.AddListener(() => { touchCount++; });
+            SpeedUpBtn.onClick.AddListener(AddSpeed);
 
             if (mStaticThings.I != null && !mStaticThings.I.isVRApp)
             {
@@ -118,12 +100,8 @@ namespace Dll_Project
                 
                 Accelerate(); 
                 
-                if (touchCount >= 10)
-                {
-                    AddSpeed();
-                    touchCount = 0;
-                }
-                if (Horses[myhorseIndex].localPosition.x < -100)
+                
+                if (Horses[myhorseIndex].localPosition.x < -417)
                 {
                     WsCChangeInfo ii = new WsCChangeInfo()
                     {
@@ -181,20 +159,21 @@ namespace Dll_Project
         }
         void AddSpeed()
         {
-            WsCChangeInfo p = new WsCChangeInfo()
+            touchCount++;
+            if (touchCount > 10 && GameStarted)
             {
-                a = "AddSpeed",
-                b = myhorseIndex.ToString(),                
-            };
-            MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), p);
+                WsCChangeInfo p = new WsCChangeInfo()
+                {
+                    a = "AddSpeed",
+                    b = myhorseIndex.ToString(),
+                };
+                MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), p);
+                touchCount = 0;
+            }
         }
         void RoomConnect()
         {
-
-            Debug.LogError("econ");
-            
-            MainCanvas.transform.GetChild(0).DOScaleX(1, 0.2f);
-            
+            MainCanvas.transform.GetChild(0).DOScaleX(1, 0.2f);            
             WsCChangeInfo wsCChangeInfo = new WsCChangeInfo
             {
                 a = "RoomConnected",
@@ -265,7 +244,7 @@ namespace Dll_Project
                 Debug.Log(mStaticThings.I.mAvatarID + " h_index: " + activePlayers);
 
                 myhorseIndex = activePlayers;
-                GameStarted = true;
+                
 
                 WsCChangeInfo _info = new WsCChangeInfo()
                 {
