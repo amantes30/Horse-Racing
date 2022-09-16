@@ -255,7 +255,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy &quot;$(TargetDir)$(ProjectName).dll&quot; &quot;G:\myProject\HorseRace\sina_vr_Pavilion\Assets\Content\Scene\DLL\$(ProjectName)dll.bytes&quot;&#xD;&#xA;copy &quot;$(TargetDir)$(ProjectName).pdb&quot;  &quot;G:\myProject\HorseRace\sina_vr_Pavilion\Assets\Content\Scene\DLL\$(ProjectName)pdb.bytes&quot;" />
+    <Exec Command="copy &quot;$(TargetDir)$(ProjectName).dll&quot; &quot;D:\Unity Projects\sina\Assets\Content\Scene\DLL\$(ProjectName)dll.bytes&quot;&#xD;&#xA;copy &quot;$(TargetDir)$(ProjectName).pdb&quot;  &quot;D:\Unity Projects\sina\Assets\Content\Scene\DLL\$(ProjectName)pdb.bytes&quot;" />
   </Target>
 
 </Project>

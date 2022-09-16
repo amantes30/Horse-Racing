@@ -47,10 +47,13 @@ namespace Dll_Project
         public int touchCount = 0;
 
         public bool GameStarted = false;
+        public bool counting = false;
 
         public string HostID;
         public string user_id;
 
+
+        public Text hostid;
         // WIN POSX -417
         public override void Init()
         {
@@ -60,6 +63,7 @@ namespace Dll_Project
             PlayerCamera = BaseMono.ExtralDatas[2].Target;
             _firstPanel = MainCanvas.transform.GetChild(0);
             _secondPanel = MainCanvas.transform.GetChild(1);
+            hostid = MainCanvas.transform.Find("HostId").GetComponent<Text>();
             Debug.Log("HorseController Init !");
         }
 
@@ -88,12 +92,18 @@ namespace Dll_Project
         }
         
 
-        public override void FixedUpdate()
+        public override void LateUpdate()
         {
+            if (activePlayers >=1 && myhorseIndex != null)
+            {
+                _firstPanel.Find("Timer").DOScaleX(1, 0.2f);
+                _firstPanel.Find("Timer").GetComponent<Text>().text =
+                "目前玩家" + activePlayers + "人，游戏还剩 " + currCountdownValue + " 秒开始";
+            }
             if (GameStarted)
             {
                 Text SpeedText = _secondPanel.Find("Speed").GetComponent<Text>();
-                SpeedText.text = "Speed: " + (_horsesInfo[myhorseIndex].speed);                
+                SpeedText.text = "Speed: " + (_horsesInfo[myhorseIndex].speed * 100);                
                 
                 PlayerCamera.localPosition =new Vector3(Horses[myhorseIndex].localPosition.x + 2, 161.953f ,PlayerCamera.localPosition.z); 
                 Debug.Log(HostID);
@@ -112,7 +122,9 @@ namespace Dll_Project
                     MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ii);
                     Transform GameOverImage = _secondPanel.Find("GameOver");
                     GameOverImage.DOScaleX(1, 0.2f);
-                    GameStarted = false;
+                    WinnerList.Add(HorseController._i._horsesInfo[myhorseIndex]);
+                    Horses[myhorseIndex].GetComponent<Animator>().SetInteger("Speed", 1);
+                    this.GameStarted = false;
 
                     _secondPanel.Find("GameOver").GetChild(0).GetComponent<Text>().text =
                         "比赛结束 \n 当前排名为：第 " + WinnerList.Count + "名";
@@ -135,25 +147,28 @@ namespace Dll_Project
         public override void OnTriggerEnter(Collider other) => Debug.LogWarning(other);
         void Accelerate()
         {
-           if (mStaticThings.I.mAvatarID != HostID) { return; }
-           Debug.Log("ACCCCCCC");
-           foreach (HorseInfo i in _horsesInfo)
+           
+            if (mStaticThings.I.mAvatarID == HostID)
             {
-                if (i.selcted && i.ready)
-                {                    
-                    Horses[i.index].Translate(Vector3.forward * i.speed);
-                    WsMovingObj _mov = new WsMovingObj() 
+                Debug.Log("ACCCCCCC");
+                foreach (HorseInfo i in _horsesInfo)
+                {
+                    if (i.selcted && i.ready)
                     {
-                        id = i.index.ToString(),
-                        islocal = true,
-                        mark = "i",
-                        name = Horses[i.index].name,
-                        position = Horses[i.index].localPosition,
-                        rotation = Horses[i.index].localRotation,
-                        scale = Horses[i.index].localScale,
-                    };
-                    MessageDispatcher.SendMessageData(WsMessageType.SendMovingObj.ToString(), _mov);
-                    
+                        Horses[i.index].Translate(Vector3.forward * i.speed*Time.deltaTime);
+                        WsMovingObj _mov = new WsMovingObj()
+                        {
+                            id = i.index.ToString(),
+                            islocal = true,
+                            mark = "i",
+                            name = Horses[i.index].name,
+                            position = Horses[i.index].localPosition,
+                            rotation = Horses[i.index].localRotation,
+                            scale = Horses[i.index].localScale,
+                        };
+                        MessageDispatcher.SendMessageData(WsMessageType.SendMovingObj.ToString(), _mov);
+
+                    }
                 }
             }
         }
@@ -187,58 +202,56 @@ namespace Dll_Project
         {
             currCountdownValue = countdownValue;
             PlayerCamera.gameObject.SetActive(true);
-            
-
-           
-            while (currCountdownValue >= 0)
             {
-                if (activePlayers > 1)
+                if (mStaticThings.I.mAvatarID == HostID) yield return null;
+                counting = true;
+                while (currCountdownValue >= 0)
                 {
+
+                    Debug.Log("Countdown: " + currCountdownValue);
+                    yield return new WaitForSeconds(1.0f);
                     WsCChangeInfo _in = new WsCChangeInfo()
                     {
-                        a = "countdown",
+                        a = "Count",
                         b = currCountdownValue.ToString(),
                         c = activePlayers.ToString(),
-                    };
-                    MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), _in);
+                    }; MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), _in);
+
+                    currCountdownValue--;
+                    if (activePlayers == 1 && currCountdownValue == 0)
+                    {
+                        currCountdownValue = 15;
+                        _firstPanel.Find("wait").DOScaleX(1, 0.2f);
+                        Debug.Log("WAITING FOR OTHER PLAYERS");
+                    }
                 }
-
-                Debug.Log("Countdown: " + currCountdownValue);
-                yield return new WaitForSeconds(1.0f);
-
-                currCountdownValue--;
-
-                
             }
+           
+            
             Debug.Log(activePlayers);
-           if (activePlayers <= 1 && currCountdownValue<0) {
-                _firstPanel.Find("wait").DOScaleX(1, 0.2f);
-                Debug.Log("WAITING FOR OTHER PLAYERS");
-                
-            }
-            else if(activePlayers >1)
+           
+            
+            Debug.Log("DONEEE");
+            WsCChangeInfo ms = new WsCChangeInfo
             {
-                 
-                Debug.Log("DONEEE");
-                WsCChangeInfo ms = new WsCChangeInfo
-                {
-                    a = "StartGame",
-                    b = activePlayers.ToString(),
-                };
-                MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ms);
-            }
+                a = "StartGame",
+                b = activePlayers.ToString(),
+            };
+            MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ms);
+            
         }
 
         // Join Game Button
         void JoinGame()
         {
             Debug.Log("JoinGame Clicked");
+            _firstPanel.Find("JoinGame").gameObject.SetActive(false);
             if (activePlayers == 0) { HostID = user_id; }
             if (activePlayers <= 10)
             {
                 _firstPanel.Find("Rules").DOScaleX(0, 0.5f);
                 _firstPanel.Find("JoinGame").DOScaleX(0, 0.5f);
-                _firstPanel.Find("Timer").DOScaleX(1, 0.5f);
+                _firstPanel.Find("Timer").DOScaleX(1, 0.2f);
 
 
                 Debug.Log(mStaticThings.I.mAvatarID + " h_index: " + activePlayers);
@@ -260,6 +273,7 @@ namespace Dll_Project
             {
                 GameStarted = false;
                 Debug.Log("WAITTTT");
+                _firstPanel.Find("JoinGame").gameObject.SetActive(true);
                 // FULL,  WAIT FEW MINUTES UI
             }
 
