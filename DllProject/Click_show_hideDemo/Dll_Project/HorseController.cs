@@ -43,11 +43,13 @@ namespace Dll_Project
         public List<Transform> Doors = new List<Transform>();
 
         public int activePlayers = 0;
-        public int myhorseIndex = 0;
+        public int myhorseIndex;
         public int touchCount = 0;
 
         public bool GameStarted = false;
+        public bool Finished = false;
         public bool counting = false;
+        public bool horseselected = false;
 
         public string HostID;
         public string user_id;
@@ -94,12 +96,7 @@ namespace Dll_Project
 
         public override void LateUpdate()
         {
-            if (activePlayers >=1 && myhorseIndex != null)
-            {
-                _firstPanel.Find("Timer").DOScaleX(1, 0.2f);
-                _firstPanel.Find("Timer").GetComponent<Text>().text =
-                "目前玩家" + activePlayers + "人，游戏还剩 " + currCountdownValue + " 秒开始";
-            }
+           
             if (GameStarted)
             {
                 Text SpeedText = _secondPanel.Find("Speed").GetComponent<Text>();
@@ -111,7 +108,7 @@ namespace Dll_Project
                 Accelerate(); 
                 
                 
-                if (Horses[myhorseIndex].localPosition.x < -417)
+                if (Horses[myhorseIndex].localPosition.x < -417 && !Finished)
                 {
                     WsCChangeInfo ii = new WsCChangeInfo()
                     {
@@ -122,14 +119,14 @@ namespace Dll_Project
                     MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ii);
                     Transform GameOverImage = _secondPanel.Find("GameOver");
                     GameOverImage.DOScaleX(1, 0.2f);
-                    WinnerList.Add(HorseController._i._horsesInfo[myhorseIndex]);
+                    WinnerList.Add(_horsesInfo[myhorseIndex]);
                     Horses[myhorseIndex].GetComponent<Animator>().SetInteger("Speed", 1);
-                    this.GameStarted = false;
+                    
 
                     _secondPanel.Find("GameOver").GetChild(0).GetComponent<Text>().text =
                         "比赛结束 \n 当前排名为：第 " + WinnerList.Count + "名";
-                    Transform cam = PlayerCamera;
-                    cam.localPosition = new Vector3(-3.9f, cam.localPosition.y, cam.localPosition.z);
+                    Finished = true;
+                    
                 }
 
             }
@@ -192,39 +189,40 @@ namespace Dll_Project
             WsCChangeInfo wsCChangeInfo = new WsCChangeInfo
             {
                 a = "RoomConnected",
-                b = user_id,                
+                b = user_id,
+                
                
             };
             MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), wsCChangeInfo);
         }
-        float currCountdownValue;
+        public float currCountdownValue;
         public IEnumerator StartCountdown(float countdownValue)
         {
+            counting = true;
             currCountdownValue = countdownValue;
             PlayerCamera.gameObject.SetActive(true);
-            {
-                if (mStaticThings.I.mAvatarID == HostID) yield return null;
-                counting = true;
+           
                 while (currCountdownValue >= 0)
                 {
+                    _firstPanel.Find("Timer").GetComponent<Text>().text =
+                       "目前玩家" + activePlayers + "人，游戏还剩 " + currCountdownValue + " 秒开始";
+                    Debug.LogError("rec user " + user_id);
 
-                    Debug.Log("Countdown: " + currCountdownValue);
+                Debug.Log("Countdown: " + currCountdownValue);
                     yield return new WaitForSeconds(1.0f);
-                    WsCChangeInfo _in = new WsCChangeInfo()
+                    /*WsCChangeInfo _in = new WsCChangeInfo()
                     {
                         a = "Count",
                         b = currCountdownValue.ToString(),
                         c = activePlayers.ToString(),
                     }; MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), _in);
-
+                    */
                     currCountdownValue--;
-                    if (activePlayers == 1 && currCountdownValue == 0)
-                    {
-                        currCountdownValue = 15;
-                        _firstPanel.Find("wait").DOScaleX(1, 0.2f);
-                        Debug.Log("WAITING FOR OTHER PLAYERS");
-                    }
+                    
                 }
+            if (activePlayers == 1)
+            {
+                StartCountdown(15).Reset();
             }
            
             
@@ -247,6 +245,7 @@ namespace Dll_Project
             Debug.Log("JoinGame Clicked");
             _firstPanel.Find("JoinGame").gameObject.SetActive(false);
             if (activePlayers == 0) { HostID = user_id; }
+            
             if (activePlayers <= 10)
             {
                 _firstPanel.Find("Rules").DOScaleX(0, 0.5f);
@@ -257,8 +256,9 @@ namespace Dll_Project
                 Debug.Log(mStaticThings.I.mAvatarID + " h_index: " + activePlayers);
 
                 myhorseIndex = activePlayers;
-                
 
+                horseselected = true;
+                
                 WsCChangeInfo _info = new WsCChangeInfo()
                 {
                     a = "SelectHorse",
@@ -268,6 +268,7 @@ namespace Dll_Project
                     e = activePlayers.ToString()
                 };
                 MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), _info);
+                mStaticThings.I.StartCoroutine(StartCountdown(15));
             }
             else if (activePlayers > 10)
             {

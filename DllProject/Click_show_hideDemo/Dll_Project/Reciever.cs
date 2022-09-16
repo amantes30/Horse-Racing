@@ -22,7 +22,7 @@ namespace Dll_Project
         public override void Init()
         {
             MessageDispatcher.AddListener(WsMessageType.RecieveCChangeObj.ToString(), RecieveCChangeObj);
-            canvas = HorseController._i.MainCanvas;
+            canvas = BaseMono.ExtralDatas[0].Target.GetComponent<Canvas>();
             _firstPanel = canvas.transform.GetChild(0);
             _secondPanel = canvas.transform.GetChild(1);
             Debug.Log("Reciever Is ON");
@@ -132,15 +132,10 @@ namespace Dll_Project
                         }
                     }
                     break;
-               
-
                     
                 case "SelectHorse":
-
+                    int _index = int.Parse(ms.b);
                     
-                    int _index = 0;
-                                           
-                    _index = int.Parse(ms.b);
                     HorseInfo selectedInfo = new HorseInfo()
                     {
                         selcted = true,
@@ -160,31 +155,18 @@ namespace Dll_Project
                     DoorAnimator.SetTrigger("isOpen");
 
                     Debug.LogError(HostID + "dfsssssssssss");
-                    int waittime = 15;
-                    if (ms.c == HostID)
+                    if (HorseController._i.counting)
                     {
-                       
-                        mStaticThings.I.StartCoroutine(HorseController._i.StartCountdown(waittime));
+                        HorseController._i.currCountdownValue = 15;
                     }
-                    
-                    
-                    
 
                     Animator h_animator = HorseController._i.Horses[_index].GetComponent<Animator>();
                     h_animator.SetInteger("Speed", 1);
                            
-                    mStaticThings.I.StartCoroutine(wait(5, HorseController._i.Horses[_index], selectedInfo));
-                   
+                    mStaticThings.I.StartCoroutine(PrepareHorse(5, HorseController._i.Horses[_index], selectedInfo));                   
                     Debug.Log("select Message");
                     break;
-                case "Count":
-                    Debug.LogError("COUNT");
-                    int currCountdownValue = int.Parse(ms.b);
-                    int activePlayers = int.Parse(ms.c);
-
-                    Debug.LogError("rec user " + user_id);
-                    
-                    break;
+               
                 case "StartGame":
                     _secondPanel.gameObject.SetActive(true);
                     _firstPanel.Find("Timer").DOScaleX(0, 0.5f);
@@ -197,32 +179,8 @@ namespace Dll_Project
                     }
                         
                     StartGame();
-                   
-                   
-                        
-                  
                     break;
-                case "Finished":
-                    if (!HorseController._i.GameStarted) return;
-                    HorseController._i.WinnerList.Add(HorseController._i._horsesInfo[int.Parse(ms.b)]);
-                    HorseController._i.Horses[int.Parse(ms.b)].GetComponent<Animator>().SetInteger("Speed", 1);
-
-                    if (HorseController._i.WinnerList.Count == HorseController._i.activePlayers+1 && game_started)
-                    {
-                        Button ResetBtn = canvas.transform.GetChild(1).Find("ResetButton").GetComponent<Button>();
-                        ResetBtn.transform.DOScaleX(1, 0.2f);
-                        ResetBtn.onClick.AddListener(() =>
-                        {
-                            mStaticThings.I.StartCoroutine(ResetGame());
-                        });
-                        
-                    }
-                    
-                    break;
-                
-
-                case "AddSpeed":
-                   
+                case "AddSpeed":                 
                     
                         int indexxx = int.Parse(ms.b);
                         Transform _t = HorseController._i.Horses[indexxx];
@@ -231,10 +189,34 @@ namespace Dll_Project
                         SendPosition(_t, "s");
                    
                     break;
-                
+                case "Finished":
+                    if (!HorseController._i.GameStarted) return;
+                    if (mStaticThings.I.mAvatarID != ms.c)
+                    {
+                        HorseController._i.WinnerList.Add(HorseController._i._horsesInfo[int.Parse(ms.b)]);
+                    }
+
+                    HorseController._i.Horses[int.Parse(ms.b)].GetComponent<Animator>().SetInteger("Speed", 1);
+                    HorseController._i._horsesInfo[int.Parse(ms.b)].speed = 0;
+
+                    if (HorseController._i.WinnerList.Count == HorseController._i.activePlayers && HorseController._i.GameStarted)
+                    {
+                        Transform cam = HorseController._i.PlayerCamera;
+                        cam.localPosition = new Vector3(-3.9f, cam.localPosition.y, cam.localPosition.z);
+                        Button ResetBtn = canvas.transform.GetChild(1).Find("ResetButton").GetComponent<Button>();
+                        ResetBtn.transform.DOScaleX(1, 0.2f);
+                        ResetBtn.onClick.AddListener(() =>
+                        {
+                            mStaticThings.I.StartCoroutine(ResetGame());
+                        });
+
+                    }
+
+                    break;
+
             }
         }
-        IEnumerator wait(float waittime, Transform _t , HorseInfo h_inf)
+        IEnumerator PrepareHorse(float waittime, Transform _t , HorseInfo h_inf)
         {
             yield return new WaitForSeconds(waittime);
             _t.GetComponent<Animator>().SetInteger("Speed", 0);
@@ -243,7 +225,7 @@ namespace Dll_Project
         void StartGame()
         {
             HorseController._i.GameStarted = true;
-            game_started = true;
+            
 
             Transform _horseObj;
             foreach (HorseInfo i in HorseController._i._horsesInfo)
@@ -318,6 +300,7 @@ namespace Dll_Project
             HostID = "";
             HorseController._i.WinnerList.Clear();
             HorseController._i.GameStarted = false;
+            HorseController._i.counting = false;
             HorseController._i.myhorseIndex = 0;
 
             HorseController._i.PlayerCamera.gameObject.SetActive(false);
