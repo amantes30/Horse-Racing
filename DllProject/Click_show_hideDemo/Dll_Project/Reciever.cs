@@ -168,8 +168,8 @@ namespace Dll_Project
                     break;
                
                 case "StartGame":
-                    _secondPanel.gameObject.SetActive(true);
-                    _firstPanel.Find("Timer").DOScaleX(0, 0.5f);
+                    
+                    
                     foreach (HorseInfo i in HorseController._i._horsesInfo)
                     {
                         if (i.selcted && mStaticThings.I.mAvatarID == i.user_id)
@@ -191,19 +191,18 @@ namespace Dll_Project
                     break;
                 case "Finished":
                     if (!HorseController._i.GameStarted) return;
-                    if (mStaticThings.I.mAvatarID != ms.c)
-                    {
-                        HorseController._i.WinnerList.Add(HorseController._i._horsesInfo[int.Parse(ms.b)]);
-                    }
+
+                    HorseController._i.Rank++;
 
                     HorseController._i.Horses[int.Parse(ms.b)].GetComponent<Animator>().SetInteger("Speed", 1);
                     HorseController._i._horsesInfo[int.Parse(ms.b)].speed = 0;
 
-                    if (HorseController._i.WinnerList.Count == HorseController._i.activePlayers && HorseController._i.GameStarted)
+                    if (HorseController._i.Rank == HorseController._i.activePlayers)
                     {
                         Transform cam = HorseController._i.PlayerCamera;
                         cam.localPosition = new Vector3(-3.9f, cam.localPosition.y, cam.localPosition.z);
                         Button ResetBtn = canvas.transform.GetChild(1).Find("ResetButton").GetComponent<Button>();
+                        ResetBtn.gameObject.SetActive(true);
                         ResetBtn.transform.DOScaleX(1, 0.2f);
                         ResetBtn.onClick.AddListener(() =>
                         {
@@ -272,14 +271,16 @@ namespace Dll_Project
             _secondPanel.gameObject.SetActive(false);
             _secondPanel.Find("GameOver").DOScaleX(0, 0.2f);
             _secondPanel.Find("ResetButton").DOScaleX(0, 0.2f);
+            _firstPanel.Find("Back").gameObject.SetActive(true);
             _firstPanel.gameObject.SetActive(true);
             _firstPanel.Find("JoinGame").gameObject.SetActive(true);
+            _firstPanel.Find("JoinGame").GetComponent<Button>().interactable = true;
             _firstPanel.Find("JoinGame").DOScaleX(1, 0.5f);
             _firstPanel.Find("Rules").DOScaleX(1, 0.5f);            
             _firstPanel.Find("RawImage").DOScaleX(0, 0.2f);
             _firstPanel.Find("wait").DOScaleX(0, 0.2f);
             _firstPanel.Find("Timer").DOScaleX(0, 0.2f);
-
+            _firstPanel.Find("JoinGame").GetComponent<Button>().interactable = false;
             foreach (HorseInfo i in HorseController._i._horsesInfo)
             {
                 HorseController._i.Doors[i.index].GetComponent<Animator>().Rebind();
@@ -298,7 +299,7 @@ namespace Dll_Project
             HorseController._i.activePlayers = 0;
             HorseController._i.HostID = "";
             HostID = "";
-            HorseController._i.WinnerList.Clear();
+            HorseController._i.Rank = 1;
             HorseController._i.GameStarted = false;
             HorseController._i.counting = false;
             HorseController._i.myhorseIndex = 0;

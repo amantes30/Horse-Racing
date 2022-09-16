@@ -38,11 +38,12 @@ namespace Dll_Project
         Transform _secondPanel;
 
         public List<Transform> Horses = new List<Transform>();        // List Of Horse Objects
-        public List<HorseInfo> WinnerList = new List<HorseInfo>();       // List Of Horse Objects
+        
         public List<HorseInfo> _horsesInfo = new List<HorseInfo>();   // Store Horse Information
         public List<Transform> Doors = new List<Transform>();
 
         public int activePlayers = 0;
+        public int Rank = 1;
         public int myhorseIndex;
         public int touchCount = 0;
 
@@ -77,7 +78,13 @@ namespace Dll_Project
       
         public override void Start()
         {
+            RoomConnect();
+
+            // INITIALIZE HORSES AND HORSE STATUS IN A LIST
+            InitializeLists();
+
             Button SpeedUpBtn = _secondPanel.Find("SpeedBtn").GetComponent<Button>();
+            SpeedUpBtn.gameObject.SetActive(true);
             SpeedUpBtn.onClick.AddListener(AddSpeed);
 
             if (mStaticThings.I != null && !mStaticThings.I.isVRApp)
@@ -85,11 +92,7 @@ namespace Dll_Project
                 user_id = mStaticThings.I.mAvatarID;
             }
 
-            RoomConnect();
-
-            // INITIALIZE HORSES AND HORSE STATUS IN A LIST
-            InitializeLists();
-
+           
             _firstPanel.Find("JoinGame").GetComponent<Button>().onClick.AddListener(JoinGame);
         }
         
@@ -110,6 +113,8 @@ namespace Dll_Project
                 
                 if (Horses[myhorseIndex].localPosition.x < -417 && !Finished)
                 {
+                    _secondPanel.Find("GameOver").GetChild(0).GetComponent<Text>().text =
+                           "           " + Rank;
                     WsCChangeInfo ii = new WsCChangeInfo()
                     {
                         a = "Finished",
@@ -119,12 +124,11 @@ namespace Dll_Project
                     MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ii);
                     Transform GameOverImage = _secondPanel.Find("GameOver");
                     GameOverImage.DOScaleX(1, 0.2f);
-                    WinnerList.Add(_horsesInfo[myhorseIndex]);
+                    
                     Horses[myhorseIndex].GetComponent<Animator>().SetInteger("Speed", 1);
                     
 
-                    _secondPanel.Find("GameOver").GetChild(0).GetComponent<Text>().text =
-                        "比赛结束 \n 当前排名为：第 " + WinnerList.Count + "名";
+                    
                     Finished = true;
                     
                 }
@@ -132,8 +136,7 @@ namespace Dll_Project
             }
             if(activePlayers > 2)
             {
-                MainCanvas.transform.GetChild(0).Find("Timer").GetComponent<Text>().text =
-                       "目前玩家" + activePlayers + "人，游戏还剩" + currCountdownValue.ToString() + "秒开始";
+                _firstPanel.Find("Timer").GetComponent<Text>().text = currCountdownValue.ToString();
             }
             
         }
@@ -201,42 +204,43 @@ namespace Dll_Project
             counting = true;
             currCountdownValue = countdownValue;
             PlayerCamera.gameObject.SetActive(true);
-           
-                while (currCountdownValue >= 0)
-                {
-                    _firstPanel.Find("Timer").GetComponent<Text>().text =
-                       "目前玩家" + activePlayers + "人，游戏还剩 " + currCountdownValue + " 秒开始";
-                    Debug.LogError("rec user " + user_id);
+
+            while (currCountdownValue >= 0)
+            {
+                _firstPanel.Find("Timer").GetComponent<Text>().text = currCountdownValue.ToString();
+                Debug.LogError("rec user " + user_id);
 
                 Debug.Log("Countdown: " + currCountdownValue);
-                    yield return new WaitForSeconds(1.0f);
-                    /*WsCChangeInfo _in = new WsCChangeInfo()
-                    {
-                        a = "Count",
-                        b = currCountdownValue.ToString(),
-                        c = activePlayers.ToString(),
-                    }; MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), _in);
-                    */
-                    currCountdownValue--;
-                    
-                }
+                yield return new WaitForSeconds(1.0f);
+                /*WsCChangeInfo _in = new WsCChangeInfo()
+                {
+                    a = "Count",
+                    b = currCountdownValue.ToString(),
+                    c = activePlayers.ToString(),
+                }; MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), _in);
+                */
+                currCountdownValue--;
+
+            }
             if (activePlayers == 1)
             {
-                StartCountdown(15).Reset();
+                mStaticThings.I.StartCoroutine(StartCountdown(15));
             }
-           
-            
             Debug.Log(activePlayers);
-           
-            
             Debug.Log("DONEEE");
-            WsCChangeInfo ms = new WsCChangeInfo
+            if (activePlayers > 1)
             {
-                a = "StartGame",
-                b = activePlayers.ToString(),
-            };
-            MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ms);
-            
+                _secondPanel.gameObject.SetActive(true);
+                _firstPanel.Find("Timer").DOScaleX(0, 0.5f);
+                _firstPanel.Find("CloseBtn").gameObject.SetActive(false);
+                WsCChangeInfo ms = new WsCChangeInfo
+                {
+                    a = "StartGame",
+                    b = activePlayers.ToString(),
+                };
+                MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ms);
+
+            }
         }
 
         // Join Game Button
@@ -251,6 +255,7 @@ namespace Dll_Project
                 _firstPanel.Find("Rules").DOScaleX(0, 0.5f);
                 _firstPanel.Find("JoinGame").DOScaleX(0, 0.5f);
                 _firstPanel.Find("Timer").DOScaleX(1, 0.2f);
+                _firstPanel.Find("Back").gameObject.SetActive(false);
 
 
                 Debug.Log(mStaticThings.I.mAvatarID + " h_index: " + activePlayers);
@@ -275,6 +280,7 @@ namespace Dll_Project
                 GameStarted = false;
                 Debug.Log("WAITTTT");
                 _firstPanel.Find("JoinGame").gameObject.SetActive(true);
+                _firstPanel.Find("JoinGame").GetComponent<Button>().interactable = false;
                 // FULL,  WAIT FEW MINUTES UI
             }
 
@@ -295,6 +301,10 @@ namespace Dll_Project
                 _horsesInfo.Add(h_inf);
                 Doors.Add(BaseMono.ExtralDatas[3].Info[i].Target);
             }
+            _firstPanel.Find("Rules").gameObject.SetActive(true);
+            _firstPanel.Find("JoinGame").gameObject.SetActive(true);
+            _firstPanel.Find("CloseBtn").gameObject.SetActive(true);
+            _firstPanel.Find("Back").gameObject.SetActive(true);
         }
         public void PositionCamera(int _index)
         {
