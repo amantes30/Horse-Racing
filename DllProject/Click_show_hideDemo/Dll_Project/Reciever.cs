@@ -163,21 +163,11 @@ namespace Dll_Project
                     Animator h_animator = HorseController._i.Horses[_index].GetComponent<Animator>();
                     h_animator.SetInteger("Speed", 1);
                            
-                    mStaticThings.I.StartCoroutine(PrepareHorse(5, HorseController._i.Horses[_index], selectedInfo));                   
+                    mStaticThings.I.StartCoroutine(PrepareHorse(3, HorseController._i.Horses[_index], selectedInfo));                   
                     Debug.Log("select Message");
                     break;
                
                 case "StartGame":
-                    
-                    
-                    foreach (HorseInfo i in HorseController._i._horsesInfo)
-                    {
-                        if (i.selcted && mStaticThings.I.mAvatarID == i.user_id)
-                        {
-                            HorseController._i.PositionCamera(i.index);
-                        }
-                    }
-                        
                     StartGame();
                     break;
                 case "AddSpeed":                 
@@ -185,14 +175,14 @@ namespace Dll_Project
                         int indexxx = int.Parse(ms.b);
                         Transform _t = HorseController._i.Horses[indexxx];
                         HorseInfo _i = HorseController._i._horsesInfo[indexxx];
-                        _i.speed += 0.01f;
+                        _i.speed += 0.5f;
                         SendPosition(_t, "s");
                    
                     break;
                 case "Finished":
                     if (!HorseController._i.GameStarted) return;
 
-                    HorseController._i.Rank++;
+                    HorseController._i.Rank = int.Parse(ms.d);
 
                     HorseController._i.Horses[int.Parse(ms.b)].GetComponent<Animator>().SetInteger("Speed", 1);
                     HorseController._i._horsesInfo[int.Parse(ms.b)].speed = 0;
@@ -237,9 +227,9 @@ namespace Dll_Project
                 }
                 else
                 {
-                    _firstPanel.Find("RawImage").DOScaleX(1, 0.2f);
                     
-                    i.speed += 0.5f;
+                    
+                    i.speed += 1f;
                     _horseObj.GetComponent<Animator>().SetInteger("Speed", 2);
 
                     SendPosition(_horseObj, "s");
@@ -279,7 +269,7 @@ namespace Dll_Project
             _firstPanel.Find("Rules").DOScaleX(1, 0.5f);            
             _firstPanel.Find("RawImage").DOScaleX(0, 0.2f);
             _firstPanel.Find("wait").DOScaleX(0, 0.2f);
-            _firstPanel.Find("Timer").DOScaleX(0, 0.2f);
+            _secondPanel.Find("Timer").DOScaleX(0, 0.2f);
             _firstPanel.Find("JoinGame").GetComponent<Button>().interactable = false;
             foreach (HorseInfo i in HorseController._i._horsesInfo)
             {

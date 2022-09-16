@@ -115,11 +115,13 @@ namespace Dll_Project
                 {
                     _secondPanel.Find("GameOver").GetChild(0).GetComponent<Text>().text =
                            "           " + Rank;
+                    Rank++;
                     WsCChangeInfo ii = new WsCChangeInfo()
                     {
                         a = "Finished",
                         b = myhorseIndex.ToString(),
                         c = mStaticThings.I.mAvatarID,
+                        d = Rank.ToString()
                     };
                     MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ii);
                     Transform GameOverImage = _secondPanel.Find("GameOver");
@@ -136,7 +138,7 @@ namespace Dll_Project
             }
             if(activePlayers > 2)
             {
-                _firstPanel.Find("Timer").GetComponent<Text>().text = currCountdownValue.ToString();
+                _secondPanel.Find("Timer").GetComponent<Text>().text = currCountdownValue.ToString();
             }
             
         }
@@ -207,7 +209,7 @@ namespace Dll_Project
 
             while (currCountdownValue >= 0)
             {
-                _firstPanel.Find("Timer").GetComponent<Text>().text = currCountdownValue.ToString();
+                _secondPanel.Find("Timer").GetComponent<Text>().text = currCountdownValue.ToString();
                 Debug.LogError("rec user " + user_id);
 
                 Debug.Log("Countdown: " + currCountdownValue);
@@ -231,7 +233,7 @@ namespace Dll_Project
             if (activePlayers > 1)
             {
                 _secondPanel.gameObject.SetActive(true);
-                _firstPanel.Find("Timer").DOScaleX(0, 0.5f);
+                _secondPanel.Find("Timer").DOScaleX(0, 0.5f);
                 _firstPanel.Find("CloseBtn").gameObject.SetActive(false);
                 WsCChangeInfo ms = new WsCChangeInfo
                 {
@@ -254,14 +256,14 @@ namespace Dll_Project
             {
                 _firstPanel.Find("Rules").DOScaleX(0, 0.5f);
                 _firstPanel.Find("JoinGame").DOScaleX(0, 0.5f);
-                _firstPanel.Find("Timer").DOScaleX(1, 0.2f);
+                _secondPanel.Find("Timer").DOScaleX(1, 0.2f);
                 _firstPanel.Find("Back").gameObject.SetActive(false);
 
-
+                _firstPanel.Find("RawImage").DOScaleX(1, 0.2f);
                 Debug.Log(mStaticThings.I.mAvatarID + " h_index: " + activePlayers);
 
                 myhorseIndex = activePlayers;
-
+                PositionCamera(myhorseIndex);
                 horseselected = true;
                 
                 WsCChangeInfo _info = new WsCChangeInfo()
