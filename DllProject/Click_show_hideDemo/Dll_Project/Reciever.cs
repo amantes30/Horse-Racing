@@ -43,24 +43,24 @@ namespace Dll_Project
         
         public override void OnEnable()
         {
-            MessageDispatcher.AddListener(WsMessageType.RecieveCChangeObj.ToString(), RecieveCChangeObj);           
+            MessageDispatcher.AddListener(WsMessageType.SendCChangeObj.ToString(), RecieveCChangeObj);           
                       
                        
         }
         public override void OnDisable()
         {
-            MessageDispatcher.RemoveListener(WsMessageType.RecieveCChangeObj.ToString(), RecieveCChangeObj);            
+            MessageDispatcher.RemoveListener(WsMessageType.SendCChangeObj.ToString(), RecieveCChangeObj);            
                    
         }
       
         void RecieveCChangeObj(IMessage m)
         {
             WsCChangeInfo ms = m.Data as WsCChangeInfo;
-            Debug.LogError(ms.a);
+            
             switch (ms.a)
             { 
                 case "RoomConnected":
-                    Debug.LogError("RoomConnected");
+                    
                     NewUserInfo _info;
                     if (HostID == HorseController._i.user_id)
                     {
@@ -107,7 +107,7 @@ namespace Dll_Project
                             {
                                 HorseController._i._horsesInfo[i.index] = i;
                                 HorseController._i.activePlayers = int.Parse(ms.e);
-                                Debug.LogError(HorseController._i.activePlayers);
+                                
 
                                 Animator _DoorAnimator = HorseController._i.Doors[i.index].GetComponent<Animator>();
                                 _DoorAnimator.SetTrigger("isOpen");
@@ -148,13 +148,13 @@ namespace Dll_Project
                     HorseController._i.hostid.text = "Host ID - " + HostID;
                     HorseController._i._horsesInfo[_index] = selectedInfo;
                     HorseController._i.activePlayers = int.Parse(ms.e);
-                    HorseController._i.activePlayers++;
-                    Debug.LogError(HorseController._i.activePlayers);
+                    
+                    
 
                     Animator DoorAnimator = HorseController._i.Doors[_index].GetComponent<Animator>();
                     DoorAnimator.SetTrigger("isOpen");
 
-                    Debug.LogError(HostID + "dfsssssssssss");
+                    
                     if (HorseController._i.counting)
                     {
                         HorseController._i.currCountdownValue = 15;
@@ -163,12 +163,14 @@ namespace Dll_Project
                     Animator h_animator = HorseController._i.Horses[_index].GetComponent<Animator>();
                     h_animator.SetInteger("Speed", 1);
                            
-                    mStaticThings.I.StartCoroutine(PrepareHorse(3, HorseController._i.Horses[_index], selectedInfo));                   
+                    mStaticThings.I.StartCoroutine(PrepareHorse(4, HorseController._i.Horses[_index], selectedInfo));                   
                     Debug.Log("select Message");
                     break;
                
                 case "StartGame":
+                    HorseController._i.activePlayers = int.Parse(ms.b);
                     StartGame();
+
                     break;
                 case "AddSpeed":                 
                     
@@ -186,9 +188,13 @@ namespace Dll_Project
 
                     HorseController._i.Horses[int.Parse(ms.b)].GetComponent<Animator>().SetInteger("Speed", 1);
                     HorseController._i._horsesInfo[int.Parse(ms.b)].speed = 0;
+                    Debug.Log("RANKR = " + HorseController._i.Rank);
+                    Debug.Log("act  = " + HorseController._i.activePlayers);
 
-                    if (HorseController._i.Rank == HorseController._i.activePlayers)
+                    if (HorseController._i.Rank-1 == HorseController._i.activePlayers && HorseController._i.GameStarted)
                     {
+                        HorseController._i.GameStarted = false;
+                        Debug.Log("COMPLETEEEE");
                         Transform cam = HorseController._i.PlayerCamera;
                         cam.localPosition = new Vector3(-3.9f, cam.localPosition.y, cam.localPosition.z);
                         Button ResetBtn = canvas.transform.GetChild(1).Find("ResetButton").GetComponent<Button>();
@@ -227,8 +233,6 @@ namespace Dll_Project
                 }
                 else
                 {
-                    
-                    
                     i.speed += 1f;
                     _horseObj.GetComponent<Animator>().SetInteger("Speed", 2);
 
@@ -261,16 +265,9 @@ namespace Dll_Project
             _secondPanel.gameObject.SetActive(false);
             _secondPanel.Find("GameOver").DOScaleX(0, 0.2f);
             _secondPanel.Find("ResetButton").DOScaleX(0, 0.2f);
-            _firstPanel.Find("Back").gameObject.SetActive(true);
-            _firstPanel.gameObject.SetActive(true);
-            _firstPanel.Find("JoinGame").gameObject.SetActive(true);
-            _firstPanel.Find("JoinGame").GetComponent<Button>().interactable = true;
-            _firstPanel.Find("JoinGame").DOScaleX(1, 0.5f);
-            _firstPanel.Find("Rules").DOScaleX(1, 0.5f);            
-            _firstPanel.Find("RawImage").DOScaleX(0, 0.2f);
-            _firstPanel.Find("wait").DOScaleX(0, 0.2f);
-            _secondPanel.Find("Timer").DOScaleX(0, 0.2f);
-            _firstPanel.Find("JoinGame").GetComponent<Button>().interactable = false;
+
+            HorseController._i.SwitchPanel("Rules");
+            
             foreach (HorseInfo i in HorseController._i._horsesInfo)
             {
                 HorseController._i.Doors[i.index].GetComponent<Animator>().Rebind();
@@ -290,11 +287,14 @@ namespace Dll_Project
             HorseController._i.HostID = "";
             HostID = "";
             HorseController._i.Rank = 1;
-            HorseController._i.GameStarted = false;
+            
             HorseController._i.counting = false;
             HorseController._i.myhorseIndex = 0;
+            HorseController._i.Finished = false;
 
-            HorseController._i.PlayerCamera.gameObject.SetActive(false);
+            Transform _c = HorseController._i.PlayerCamera;
+            _c.localPosition = new Vector3(-3, _c.localPosition.y, _c.localPosition.z);
+
             
 
             
