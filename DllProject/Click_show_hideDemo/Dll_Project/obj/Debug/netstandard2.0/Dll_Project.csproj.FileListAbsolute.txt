@@ -456,3 +456,4 @@ G:\myProject\vsvrsdk\vsvrsdk\DllProject\Click_show_hideDemo\Dll_Project\obj\Debu
 G:\myProject\vsvrsdk\vsvrsdk\DllProject\Click_show_hideDemo\Dll_Project\obj\Debug\netstandard2.0\Dll_Project.csproj.CopyComplete
 G:\myProject\vsvrsdk\vsvrsdk\DllProject\Click_show_hideDemo\Dll_Project\obj\Debug\netstandard2.0\Dll_Project.dll
 G:\myProject\vsvrsdk\vsvrsdk\DllProject\Click_show_hideDemo\Dll_Project\obj\Debug\netstandard2.0\Dll_Project.pdb
+D:\Unity Projects\vswork\horseDemo\DllProject\Click_show_hideDemo\Dll_Project\obj\Debug\netstandard2.0\Dll_Project.csproj.AssemblyReference.cache

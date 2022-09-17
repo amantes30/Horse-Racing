@@ -18,27 +18,27 @@ public class HorseInfo
 
 public class NewUserInfo
 {
-    public List<HorseInfo> __horseinfo;
-    public bool ButtonPressed, _gameStarted;
+    
+    public bool _gameStarted = false;
     public string _hostID = "";
-    public int activeUsers;
+    public int activeUsers=0;
 }
 
 namespace Dll_Project
 {
-    public class HorseController : DllGenerateBase 
+    public class HorseController : DllGenerateBase
     {
         public static HorseController _i;
 
         // Objects From Scene
         public Canvas MainCanvas;
-        public Transform table;        
+        public Transform table;
         public Transform PlayerCamera;
         Transform _firstPanel;
         Transform _secondPanel;
 
         public List<Transform> Horses = new List<Transform>();        // List Of Horse Objects
-        
+
         public List<HorseInfo> _horsesInfo = new List<HorseInfo>();   // Store Horse Information
         public List<Transform> Doors = new List<Transform>();
 
@@ -72,13 +72,19 @@ namespace Dll_Project
 
         public override void Awake()
         {
-            Debug.Log("HorseController Awake !");            
-                       
-        }      
-      
+            Debug.Log("HorseController Awake !");
+
+        }
+
         public override void Start()
         {
-            RoomConnect();
+
+            if (mStaticThings.I != null && !mStaticThings.I.isVRApp)
+            {
+                user_id = mStaticThings.I.mAvatarID;
+            }
+
+
 
             // INITIALIZE HORSES AND HORSE STATUS IN A LIST
             InitializeLists();
@@ -87,30 +93,37 @@ namespace Dll_Project
             SpeedUpBtn.gameObject.SetActive(true);
             SpeedUpBtn.onClick.AddListener(AddSpeed);
 
-            if (mStaticThings.I != null && !mStaticThings.I.isVRApp)
-            {
-                user_id = mStaticThings.I.mAvatarID;
-            }
 
-           
+
             _firstPanel.Find("Rules").Find("JoinGame").GetComponent<Button>().onClick.AddListener(JoinGame);
+            _firstPanel.Find("Rules").Find("CloseBtn").GetComponent<Button>().onClick.AddListener(() =>
+            {
+                _firstPanel.DOScaleX(0, 0.3f);
+            });
+            RoomConnect();
         }
-        
 
+        void Click(IMessage msg)
+        {
+            if ((msg.Data as GameObject).name == "HorsesParent")
+            {
+                _firstPanel.DOScaleX(1, 0.3f);
+            }
+        }
         public override void LateUpdate()
         {
-           
+
             if (GameStarted)
             {
                 Text SpeedText = _secondPanel.Find("Speed").GetComponent<Text>();
-                SpeedText.text = "Speed: " + (_horsesInfo[myhorseIndex].speed * 100);                
-                
-                PlayerCamera.localPosition =new Vector3(Horses[myhorseIndex].localPosition.x + 2, 161.953f ,PlayerCamera.localPosition.z); 
-                
-                
-                Accelerate(); 
-                
-                
+                SpeedText.text = "Speed: " + (_horsesInfo[myhorseIndex].speed * 100);
+
+                PlayerCamera.localPosition = new Vector3(Horses[myhorseIndex].localPosition.x + 2, 161.953f, PlayerCamera.localPosition.z);
+
+
+                Accelerate();
+
+
                 if (Horses[myhorseIndex].localPosition.x < -417 && !Finished)
                 {
                     _secondPanel.Find("GameOver").GetChild(0).GetComponent<Text>().text =
@@ -126,25 +139,32 @@ namespace Dll_Project
                     MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ii);
                     Transform GameOverImage = _secondPanel.Find("GameOver");
                     GameOverImage.DOScaleX(1, 0.2f);
-                    
-                    Horses[myhorseIndex].GetComponent<Animator>().SetInteger("Speed", 1);
-                    
 
-                    
+                    Horses[myhorseIndex].GetComponent<Animator>().SetInteger("Speed", 1);
+
+
+
                     Finished = true;
-                    
+
                 }
 
             }
-            if(activePlayers > 2)
+            if (activePlayers > 2)
             {
                 _secondPanel.Find("Timer").GetComponent<Text>().text = currCountdownValue.ToString();
             }
-            
-        }
-        public override void OnEnable() => Debug.Log("HorseController OnEnable !");
 
-        public override void OnDisable() => Debug.Log("HorseController OnDisable !");
+        }
+        public override void OnEnable()
+        {
+            MessageDispatcher.AddListener(VRPointObjEventType.VRPointClick.ToString(), Click);
+            Debug.Log("HorseController OnEnable !");
+        }
+
+        public override void OnDisable(){
+            MessageDispatcher.RemoveListener(VRPointObjEventType.VRPointClick.ToString(), Click);
+            Debug.Log("HorseController OnDisable !"); 
+        }
 
         public override void OnTriggerEnter(Collider other) => Debug.LogWarning(other);
         void Accelerate()
@@ -254,6 +274,7 @@ namespace Dll_Project
                 myhorseIndex = activePlayers;
                 PositionCamera(myhorseIndex);
                 horseselected = true;
+
                 activePlayers++;
                 WsCChangeInfo _info = new WsCChangeInfo()
                 {

@@ -66,7 +66,7 @@ namespace Dll_Project
                     {
                         _info = new NewUserInfo()
                         {
-                            __horseinfo = HorseController._i._horsesInfo,
+                            //__horseinfo = HorseController._i._horsesInfo,
                             _gameStarted = HorseController._i.GameStarted,
                             _hostID = HorseController._i.HostID,
                             activeUsers = HorseController._i.activePlayers,
@@ -79,14 +79,22 @@ namespace Dll_Project
                             c = ms.b,
                         };
                         MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ii);
-                        foreach (HorseInfo i in _info.__horseinfo)
+
+                        
+                        for (int i = 0; i < _info.activeUsers; i++) 
+                        {
+                            Transform _tt = HorseController._i.Horses[i];
+                            
+                            SendPosition(_tt, "s");
+                        }
+                        /*foreach (HorseInfo i in _info.__horseinfo)
                         {
                             if (i.selcted)
                             {
-                                Transform _tt = HorseController._i.Horses[i.index];
-                                SendPosition(_tt, "s");
+                                //Transform _tt = HorseController._i.Horses[i.index];
+                                //SendPosition(_tt, "s");
                             }
-                        }
+                        }*/
                     }
 
 
@@ -96,37 +104,37 @@ namespace Dll_Project
                     if (mStaticThings.I.mAvatarID == ms.c)
                     {
                         List<Transform> newUserHorses = HorseController._i.Horses;
-                        NewUserInfo p = JsonMapper.ToObject<NewUserInfo>(ms.b);
-                        HorseController._i._horsesInfo = p.__horseinfo;
+                        NewUserInfo p = JsonMapper.ToObject<NewUserInfo>(ms.b);                        
                         HorseController._i.GameStarted = p._gameStarted;
                         HorseController._i.HostID = p._hostID;
                         HorseController._i.activePlayers = p.activeUsers;
-                        foreach (HorseInfo i in p.__horseinfo)
+                        for (int i = 0; i < p.activeUsers; i++)
                         {
-                            if (i.selcted)
+                            HorseInfo _tt = new HorseInfo()
                             {
-                                HorseController._i._horsesInfo[i.index] = i;
-                                HorseController._i.activePlayers = int.Parse(ms.e);
-                                
+                                selcted = true,
+                                index = i,
+                            };
+                            HorseController._i._horsesInfo[i] = _tt;
+                            Animator _DoorAnimator = HorseController._i.Doors[i].GetComponent<Animator>();
+                            _DoorAnimator.SetTrigger("isOpen");
 
-                                Animator _DoorAnimator = HorseController._i.Doors[i.index].GetComponent<Animator>();
-                                _DoorAnimator.SetTrigger("isOpen");
-                                
-                            }
-                        }
-                        if (p._gameStarted)
-                        {
-                            _firstPanel.Find("JoinGame").gameObject.SetActive(false);
-                            // gamestarted UI wait
-                            foreach (HorseInfo o in HorseController._i._horsesInfo)
+
+
+                            if (p._gameStarted)
                             {
-                                if (o.selcted)
+                                _firstPanel.Find("JoinGame").gameObject.SetActive(false);
+                                // gamestarted UI wait
+                                foreach (HorseInfo o in HorseController._i._horsesInfo)
                                 {
-                                    HorseController._i.Horses[o.index].gameObject.SetActive(true);
-                                }
-                                else
-                                {
-                                    HorseController._i.Horses[o.index].gameObject.SetActive(false);
+                                    if (o.selcted)
+                                    {
+                                        HorseController._i.Horses[o.index].gameObject.SetActive(true);
+                                    }
+                                    else
+                                    {
+                                        HorseController._i.Horses[o.index].gameObject.SetActive(false);
+                                    }
                                 }
                             }
                         }
@@ -294,10 +302,15 @@ namespace Dll_Project
 
             Transform _c = HorseController._i.PlayerCamera;
             _c.localPosition = new Vector3(-3, _c.localPosition.y, _c.localPosition.z);
+            WsCChangeInfo wsCChangeInfo = new WsCChangeInfo
+            {
+                a = "RoomConnected",
+                b = mStaticThings.I.mAvatarID,
+            };
+            MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), wsCChangeInfo);
 
-            
 
-            
+
         }
         public override void OnTriggerEnter(Collider other)
         {
