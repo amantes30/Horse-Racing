@@ -61,7 +61,7 @@ namespace Dll_Project
             { 
                 case "RoomConnected":
                     
-                    NewUserInfo _info;
+                    NewUserInfo _info = new NewUserInfo();
                     if (HostID == HorseController._i.user_id)
                     {
                         _info = new NewUserInfo()
@@ -80,13 +80,17 @@ namespace Dll_Project
                         };
                         MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ii);
 
-                        
-                        for (int i = 0; i < _info.activeUsers; i++) 
+                        if (!_info._gameStarted)
                         {
-                            Transform _tt = HorseController._i.Horses[i];
-                            
-                            SendPosition(_tt, "s");
+                            _firstPanel.Find("JoinGame").gameObject.SetActive(true);
                         }
+                        
+                        //for (int i = 0; i < _info.activeUsers; i++) 
+                        //{
+                        //    Transform _tt = HorseController._i.Horses[i];
+                            
+                        //    SendPosition(_tt, "s");
+                        //}
                         /*foreach (HorseInfo i in _info.__horseinfo)
                         {
                             if (i.selcted)
@@ -119,12 +123,23 @@ namespace Dll_Project
                             Animator _DoorAnimator = HorseController._i.Doors[i].GetComponent<Animator>();
                             _DoorAnimator.SetTrigger("isOpen");
 
-
-
-                            if (p._gameStarted)
+                            if (!p._gameStarted)
                             {
-                                _firstPanel.Find("JoinGame").gameObject.SetActive(false);
+                                _firstPanel.Find("JoinGame").gameObject.SetActive(true);
+                                Animator _animator = HorseController._i.Horses[i].GetComponent<Animator>();
+                                _animator.SetInteger("Speed", 1);
+
+                                mStaticThings.I.StartCoroutine(PrepareHorse(4, HorseController._i.Horses[i], _tt));
+
+                            }
+
+
+                            else if (p._gameStarted)
+                            {
+                                _firstPanel.Find("Rules").DOScaleX(0, 0.2f);
+                                _firstPanel.Find("wait").DOScaleX(1, 0.3f);
                                 // gamestarted UI wait
+                                HorseController._i.ActivateWaitUI(p.activeUsers, 4);
                                 foreach (HorseInfo o in HorseController._i._horsesInfo)
                                 {
                                     if (o.selcted)
@@ -297,6 +312,7 @@ namespace Dll_Project
             HorseController._i.Rank = 1;
             
             HorseController._i.counting = false;
+            HorseController._i.horseselected = false;
             HorseController._i.myhorseIndex = 0;
             HorseController._i.Finished = false;
 

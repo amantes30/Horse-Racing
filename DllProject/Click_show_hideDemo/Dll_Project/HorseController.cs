@@ -23,6 +23,14 @@ public class NewUserInfo
     public string _hostID = "";
     public int activeUsers=0;
 }
+class WaitUI 
+{
+    public Transform panel;
+    public Text numberOfPlayers;
+    public Text waitTime;
+    public Button closeBtn;
+    public Button OkBtn;
+}
 
 namespace Dll_Project
 {
@@ -36,7 +44,7 @@ namespace Dll_Project
         public Transform PlayerCamera;
         Transform _firstPanel;
         Transform _secondPanel;
-
+        WaitUI waitUI;
         public List<Transform> Horses = new List<Transform>();        // List Of Horse Objects
 
         public List<HorseInfo> _horsesInfo = new List<HorseInfo>();   // Store Horse Information
@@ -93,19 +101,50 @@ namespace Dll_Project
             SpeedUpBtn.gameObject.SetActive(true);
             SpeedUpBtn.onClick.AddListener(AddSpeed);
 
+            InitializeAllCanvas();
 
-
+            
+            RoomConnect();
+        }
+        void InitializeAllCanvas()
+        {
+            // Rules
             _firstPanel.Find("Rules").Find("JoinGame").GetComponent<Button>().onClick.AddListener(JoinGame);
             _firstPanel.Find("Rules").Find("CloseBtn").GetComponent<Button>().onClick.AddListener(() =>
             {
                 _firstPanel.DOScaleX(0, 0.3f);
             });
-            RoomConnect();
+            // Wait 
+           
         }
+        public void ActivateWaitUI(int NoOfPlayers, int _waittime)
+        {
+            waitUI = new WaitUI
+            {
+                panel = _firstPanel.Find("wait"),
+                numberOfPlayers = waitUI.panel.Find("info").GetChild(0).GetComponent<Text>(),
+                waitTime = waitUI.panel.Find("info").GetChild(1).GetComponent<Text>(),
+                closeBtn = waitUI.panel.Find("closeBtn").GetComponent<Button>(),
+                OkBtn = waitUI.panel.Find("OkBtn").GetComponent<Button>(),
+            };
 
+            waitUI.closeBtn.onClick.AddListener(() =>
+            {
+                _firstPanel.Find("wait").DOScaleX(0, 0.2f);
+            });
+            waitUI.OkBtn.onClick.AddListener(() =>
+            {
+                _firstPanel.Find("wait").DOScaleX(0, 0.2f);
+            });
+
+            this.waitUI.numberOfPlayers.text = NoOfPlayers.ToString();
+            this.waitUI.waitTime.text = _waittime.ToString();
+            this.waitUI.panel.gameObject.SetActive(true);
+            this.waitUI.panel.DOScaleX(1, 0.2f);
+        }
         void Click(IMessage msg)
         {
-            if ((msg.Data as GameObject).name == "HorsesParent")
+            if ((msg.Data as GameObject).name == "HorsesParent" && !horseselected)
             {
                 _firstPanel.DOScaleX(1, 0.3f);
             }
@@ -113,7 +152,7 @@ namespace Dll_Project
         public override void LateUpdate()
         {
 
-            if (GameStarted)
+            if (GameStarted && horseselected)
             {
                 Text SpeedText = _secondPanel.Find("Speed").GetComponent<Text>();
                 SpeedText.text = "Speed: " + (_horsesInfo[myhorseIndex].speed * 100);
@@ -287,12 +326,12 @@ namespace Dll_Project
                 MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), _info);
                 mStaticThings.I.StartCoroutine(StartCountdown(15));
             }
-            else if (activePlayers > 10)
+            else if (activePlayers > 10 || GameStarted)
             {
-                GameStarted = false;
+                
                 Debug.Log("WAITTTT");
                 SwitchPanel("Wait");
-                
+                ActivateWaitUI(activePlayers, 4);
                 // FULL,  WAIT FEW MINUTES UI
             }
 
