@@ -3,13 +3,15 @@
   - The *horses* need to be *child object* of the *Table object*.
   - *Horses* need to have the *animator component*.
   - The *maincanvas* is the canvas that user interacts with to start game.
-    - Rename this objects in the scene.
+    - Rename this objects in the scene. (*Please see the picture below to better visualize the naming conventions*)
        - Button to start game = "StartGame".
        - Timer text when the game starts = "Timer".
        - Speed text when the game starts = "Speed".
        
 ![image](https://user-images.githubusercontent.com/49632606/190878238-44cf744e-d02f-427e-9719-240f3b7e68d2.png)
 ![image](https://user-images.githubusercontent.com/49632606/190878251-b4856dd6-41aa-4aeb-ab47-90e7c24606e4.png)
+![image](https://user-images.githubusercontent.com/49632606/190878370-c6671605-3595-457f-af6c-5e75813953b2.png)
+
 
  # In *Visual Studio*
  To declare location for outputs
