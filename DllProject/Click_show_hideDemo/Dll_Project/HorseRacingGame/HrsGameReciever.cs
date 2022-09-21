@@ -102,6 +102,7 @@ namespace Dll_Project.HorseRacingGame
                     HorseController.i.hostID = ws.d;
                     HostID = ws.d;
                     int index = int.Parse(ws.e);
+                    HorseController.i.Doors[index].GetComponent<Animator>().SetTrigger("isOpen");
                     mStaticThings.I.StartCoroutine(PrepareHorse(HorseController.i.HorsesParent.GetChild(index), 4));
 
                     if (HostID == mStaticThings.I.mAvatarID)
@@ -171,6 +172,7 @@ namespace Dll_Project.HorseRacingGame
                         ready = false,
                         timer = 15,
                         touchCount = 0,
+                        finished = false
                         
                     };
                     HorseController.i = renew;

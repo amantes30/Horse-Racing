@@ -50,7 +50,7 @@ namespace Dll_Project.HorseRacingGame
         private Transform GameCamera;
         public List<Transform> Doors = new List<Transform>();
 
-        public bool started, selected, ready;
+        public bool started, selected, ready, finished;
         public string hostID, userID;
 
 
@@ -181,6 +181,9 @@ namespace Dll_Project.HorseRacingGame
         {
             if (started && selected)
             {
+                GameCamera.localPosition = new Vector3(GameCamera.localPosition.x + 2,
+                    162,
+                    HorsesParent.GetChild(horseIndex).localPosition.z);
                 WsCChangeInfo inf = new WsCChangeInfo()
                 {
                     a = "acclerate",
@@ -193,7 +196,7 @@ namespace Dll_Project.HorseRacingGame
                     speed += 0.5f;
                     touchCount = 0;
                 }
-                if (HorsesParent.GetChild(horseIndex).localPosition.x < -100)
+                if (HorsesParent.GetChild(horseIndex).localPosition.x < -100 && !finished)
                 {
                     GameCanvas.GetChild(1).GetChild(4).DOScaleX(1, 0.2f);
                     GameCanvas.GetChild(1).GetChild(4).GetChild(0).GetComponent<Text>().text = Rank.ToString();
@@ -205,6 +208,7 @@ namespace Dll_Project.HorseRacingGame
                         c = Rank.ToString()
                     };MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), o);
                     speed = 2;
+                    finished = true;
                 }
             }
         }
