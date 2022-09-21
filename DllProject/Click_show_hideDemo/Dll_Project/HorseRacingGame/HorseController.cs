@@ -141,6 +141,7 @@ namespace Dll_Project.HorseRacingGame
                     horseIndex = numberOfPlayers;
                     numberOfPlayers++;
                     selected = true;
+                    speed = 5;
                     WsCChangeInfo startt = new WsCChangeInfo
                     {
                         a = "iselect",
@@ -155,6 +156,15 @@ namespace Dll_Project.HorseRacingGame
             });
             GameCanvas.GetChild(0).GetChild(1).DOScaleX(0, 0.2f);
             GameCanvas.GetChild(1).DOScaleX(0, 0.2f);
+            GameCanvas.GetChild(1).GetChild(5).GetComponent<Button>().onClick.AddListener(() =>
+            {
+                GameCanvas.GetChild(1).GetChild(4).DOScaleX(0, 0.2f);
+                WsCChangeInfo inn = new WsCChangeInfo()
+                {
+                    a = "ireset",
+
+                };MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), inn);
+            });
         }
         public override void OnEnable()
         {
@@ -182,6 +192,19 @@ namespace Dll_Project.HorseRacingGame
                 {
                     speed += 0.5f;
                     touchCount = 0;
+                }
+                if (HorsesParent.GetChild(horseIndex).localPosition.x < -100)
+                {
+                    GameCanvas.GetChild(1).GetChild(4).DOScaleX(1, 0.2f);
+                    GameCanvas.GetChild(1).GetChild(4).GetChild(0).GetComponent<Text>().text = Rank.ToString();
+                    Rank++;
+                    WsCChangeInfo o = new WsCChangeInfo()
+                    {
+                        a = "ifinish",
+                        b = horseIndex.ToString(),
+                        c = Rank.ToString()
+                    };MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), o);
+                    speed = 2;
                 }
             }
         }

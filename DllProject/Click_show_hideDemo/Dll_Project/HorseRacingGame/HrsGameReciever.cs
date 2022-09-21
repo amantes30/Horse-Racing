@@ -138,6 +138,44 @@ namespace Dll_Project.HorseRacingGame
                         
                     }
                     break;
+                case "ifinish":
+                    Transform a = HorseController.i.HorsesParent.GetChild(int.Parse(ws.b));
+
+                    PrepareHorse(a, 3);
+                    if (HorseController.i.Rank -1 == HorseController.i.numberOfPlayers && HorseController.i.started)
+                    {
+                        Canvas.GetChild(1).GetChild(5).DOScaleX(1, 0.2f);
+                    }
+                    break;
+                case "ireset":
+                    if (mStaticThings.I.mAvatarID == HostID)
+                    {
+                        for(int io=0; io < HorseController.i.numberOfPlayers; io++)
+                        {
+                            Transform _t = HorseController.i.HorsesParent.GetChild(io);
+                            _t.GetComponent<Animator>().SetInteger("Speed", 0);
+                            _t.localPosition = new Vector3(0, _t.localPosition.y, _t.localPosition.z);
+                            SendPosition(_t, "i");
+                        }
+                    }
+                    HostID = "";
+                    HorseController renew = new HorseController()
+                    {
+                        horseIndex = 0,
+                        hostID = "",
+                        speed = 0,
+                        selected = false,
+                        started = false,
+                        numberOfPlayers = 0,
+                        Rank = 1,
+                        ready = false,
+                        timer = 15,
+                        touchCount = 0,
+                        
+                    };
+                    HorseController.i = renew;
+                    HorseController.i.Start();
+                    break;
             }
         }
 
