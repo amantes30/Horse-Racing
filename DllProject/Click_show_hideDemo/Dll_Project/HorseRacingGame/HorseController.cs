@@ -92,15 +92,22 @@ namespace Dll_Project.HorseRacingGame
             };
             MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), info);
             GameCanvas.GetChild(0).GetChild(0).DOScaleX(1, 0.2f);
+            GameCanvas.GetChild(0).GetChild(0).Find("CloseBtn").GetComponent<Button>().onClick.AddListener(() => 
+            {
+                GameCanvas.GetChild(0).GetChild(0).DOScaleX(0, 0.2f);
+            });
             GameCanvas.GetChild(0).GetChild(1).DOScaleX(0, 0.2f);
             GameCanvas.GetChild(1).GetChild(0).DOScaleX(0, 0.2f);
         }
         public override void OnEnable()
         {
+            MessageDispatcher.AddListener(VRPointObjEventType.VRPointClick.ToString(), Click);
         }
 
         public override void OnDisable()
         {
+            MessageDispatcher.RemoveListener(VRPointObjEventType.VRPointClick.ToString(), Click);
+
         }
 
         public override void Update()
@@ -109,6 +116,13 @@ namespace Dll_Project.HorseRacingGame
         public override void OnTriggerEnter(Collider other)
         {
             base.OnTriggerEnter(other);
+        }
+        void Click(IMessage msg)
+        {
+            if ((msg.Data as GameObject).name == "HorsesParent")
+            {
+                GameCanvas.GetChild(0).GetChild(0).DOScaleX(1, 0.2f);
+            }
         }
     }
 }
