@@ -75,9 +75,9 @@ namespace Dll_Project.HorseRacingGame
                             c = ws.b
                         };
                         MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ws);
-                        for (int i = 0; i < HorseController.i.numberOfPlayers; i++)
+                        for (int iiii = 0; iiii < HorseController.i.numberOfPlayers; iiii++)
                         {
-                            SendPosition(HorseController.i.HorsesParent.GetChild(i), "s");
+                            SendPosition(HorseController.i.HorsesParent.GetChild(iiii), "s");
                         }
                     }
                     break;
@@ -89,9 +89,9 @@ namespace Dll_Project.HorseRacingGame
                         HorseController.i.numberOfPlayers = _info.activeUsers;
                         HorseController.i.hostID = _info._hostID;
 
-                        for (int i = 0; i < HorseController.i.numberOfPlayers; i++)
+                        for (int ii = 0; ii < HorseController.i.numberOfPlayers; ii++)
                         {
-                            Animator animator = HorseController.i.Doors[i].GetComponent<Animator>();
+                            Animator animator = HorseController.i.Doors[ii].GetComponent<Animator>();
                             animator.SetTrigger("isOpen");
                         }
                     }
@@ -113,9 +113,9 @@ namespace Dll_Project.HorseRacingGame
                     break;
                 case "istart":
                     HorseController.i.started = true;
-                    for (int i = 0; i < HorseController.i.numberOfPlayers; i++)
+                    for (int iii = 0; iii < HorseController.i.numberOfPlayers; iii++)
                     {
-                        Animator animator = HorseController.i.HorsesParent.GetChild(i).GetComponent<Animator>();
+                        Animator animator = HorseController.i.HorsesParent.GetChild(iii).GetComponent<Animator>();
                         animator.GetComponent<Animator>().SetInteger("Speed", 2);
 
                     }
