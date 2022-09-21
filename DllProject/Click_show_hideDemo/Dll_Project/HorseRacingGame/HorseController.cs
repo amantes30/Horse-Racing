@@ -175,7 +175,8 @@ namespace Dll_Project.HorseRacingGame
                 {
                     a = "acclerate",
                     b = userID,
-                    c = speed.ToString()
+                    c = speed.ToString(),
+                    d = horseIndex.ToString(),
                 };MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), inf);
                 if (touchCount > 10)
                 {

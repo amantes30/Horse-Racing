@@ -128,15 +128,14 @@ namespace Dll_Project.HorseRacingGame
                         txt.text = ws.b;
                     }
                     break;
-                case "accelerate":
+                case "acclerate":
                     float speed = float.Parse(ws.c);
+                    int i = int.Parse(ws.d);
                     if (ws.b == HostID)
-                    {
-                        for (int i = 0; i < HorseController.i.numberOfPlayers; i++)
-                        {
-                            HorseController.i.HorsesParent.GetChild(i).Translate(Vector3.forward * speed * Time.deltaTime);
-                            SendPosition(HorseController.i.HorsesParent.GetChild(i), "i");
-                        }
+                    {                        
+                        HorseController.i.HorsesParent.GetChild(i).Translate(Vector3.forward * speed * Time.deltaTime);
+                        SendPosition(HorseController.i.HorsesParent.GetChild(i), "i");
+                        
                     }
                     break;
             }
