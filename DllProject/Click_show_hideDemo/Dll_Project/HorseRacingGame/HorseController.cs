@@ -103,7 +103,7 @@ namespace Dll_Project.HorseRacingGame
 
                 if (numberOfPlayers == 0) { hostID = userID; }
 
-                else if (numberOfPlayers > 10)
+                if (numberOfPlayers > 10)
                 {
                     GameCanvas.GetChild(0).GetChild(1).DOScaleX(0, 0.2f);
                     GameCanvas.GetChild(0).GetChild(1).GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
@@ -132,26 +132,27 @@ namespace Dll_Project.HorseRacingGame
                     GameCanvas.GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetComponent<Text>().text = 4.ToString();
 
                 }
-                else if (numberOfPlayers < 10)
+                if (numberOfPlayers < 10)
                 {
                     GameCanvas.GetChild(0).DOScaleX(0, 0.2f);
                     GameCanvas.GetChild(1).DOScaleX(1, 0.2f);
                     horseIndex = numberOfPlayers;
                     numberOfPlayers++;
-                    WsCChangeInfo start = new WsCChangeInfo() 
+                    selected = true;
+                    WsCChangeInfo startt = new WsCChangeInfo
                     {
-                        a = "i start",
+                        a = "iselect",
                         b = numberOfPlayers.ToString(),
                         c = userID,
                         d = hostID,
                         e = horseIndex.ToString(),
                     };
-                    MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), start);
-                    selected = true;
+                    MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), startt);
+                    
                 }
             });
             GameCanvas.GetChild(0).GetChild(1).DOScaleX(0, 0.2f);
-            GameCanvas.GetChild(1).GetChild(0).DOScaleX(0, 0.2f);
+            GameCanvas.GetChild(1).DOScaleX(0, 0.2f);
         }
         public override void OnEnable()
         {

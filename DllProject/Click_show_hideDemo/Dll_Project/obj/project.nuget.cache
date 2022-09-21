@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "ymEMc2wOUcJIraMvbanNsTHrRljPTI79wL/+Glo19kIaHORV8NDQ5OlbACI02u2cobnDnqH4f8UIe1+HXdlqrg==",
+  "dgSpecHash": "UjWQbzd80e/f5edQunmTrOQ/1AZzOS5h+5krkTeUi6IIV5oE6A+KFqGRxWigRVjYZHeUrjxLgTs1ihgiQn32rw==",
   "success": true,
-  "projectFilePath": "C:\\Users\\amanu\\horseDemo\\DllProject\\Click_show_hideDemo\\Dll_Project\\Dll_Project.csproj",
+  "projectFilePath": "D:\\Unity Projects\\vswork\\horseDemo\\DllProject\\Click_show_hideDemo\\Dll_Project\\Dll_Project.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\amanu\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
     "C:\\Users\\amanu\\.nuget\\packages\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512"

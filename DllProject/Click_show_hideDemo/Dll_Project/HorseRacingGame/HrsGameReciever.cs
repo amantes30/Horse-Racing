@@ -54,9 +54,9 @@ namespace Dll_Project.HorseRacingGame
 
         void RecieveMessage(IMessage msg)
         {
-            WsCChangeInfo wsCChangeInfo = msg as WsCChangeInfo;
+            WsCChangeInfo ws = msg.Data as WsCChangeInfo;
 
-            switch (wsCChangeInfo.a)
+            switch (ws.a)
             {
                 case "NewUserConnect":
                     if (HostID!=null && HorseController.i.userID == HostID)
@@ -68,11 +68,11 @@ namespace Dll_Project.HorseRacingGame
                             _hostID = HostID,
                         };
                         string s_info = JsonMapper.ToJson(_info);
-                        WsCChangeInfo ws = new WsCChangeInfo() 
+                        WsCChangeInfo s = new WsCChangeInfo() 
                         {
                             a = "SendInfo",
                             b = s_info,
-                            c = wsCChangeInfo.b
+                            c = ws.b
                         };
                         MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ws);
                         for (int i = 0; i <= HorseController.i.numberOfPlayers; i++)
@@ -82,9 +82,9 @@ namespace Dll_Project.HorseRacingGame
                     }
                     break;
                 case "SendInfo":
-                    if (wsCChangeInfo.c == HorseController.i.userID)
+                    if (ws.c == HorseController.i.userID)
                     {
-                        NewUserInfo _info = JsonMapper.ToObject<NewUserInfo>(wsCChangeInfo.b);
+                        NewUserInfo _info = JsonMapper.ToObject<NewUserInfo>(ws.b);
                         HorseController.i.started = _info._gameStarted;
                         HorseController.i.numberOfPlayers = _info.activeUsers;
                         HorseController.i.hostID = _info._hostID;
@@ -96,12 +96,12 @@ namespace Dll_Project.HorseRacingGame
                         }
                     }
                     break;
-                case "i start":                   
-                    HorseController.i.numberOfPlayers = int.Parse(wsCChangeInfo.b);                   
-                    HorseController.i.userID = wsCChangeInfo.c;
-                    HorseController.i.hostID = wsCChangeInfo.d;
-                    HostID = wsCChangeInfo.d;
-                    int index = int.Parse(wsCChangeInfo.e);
+                case "iselect":                   
+                    HorseController.i.numberOfPlayers = int.Parse(ws.b);                   
+                    
+                    HorseController.i.hostID = ws.d;
+                    HostID = ws.d;
+                    int index = int.Parse(ws.e);
                     mStaticThings.I.StartCoroutine(PrepareHorse(HorseController.i.HorsesParent.GetChild(index), 4));
 
                     if (HostID == mStaticThings.I.mAvatarID)
@@ -114,8 +114,9 @@ namespace Dll_Project.HorseRacingGame
                 case "Timer":
                     if (HorseController.i.selected)
                     {
-                        Text txt = Canvas.GetChild(0).Find("Timer").GetChild(1).GetComponent<Text>();
-                        txt.text = wsCChangeInfo.b;
+                        Text txt = Canvas.GetChild(1).Find("Timer").GetComponent<Text>();
+                        txt.transform.DOScaleX(1, 0.2f);
+                        txt.text = ws.b;
                     }
                     break;
             }
