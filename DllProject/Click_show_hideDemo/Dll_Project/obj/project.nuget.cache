@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "SVcEVIaaun5tFaBQLzpQ7rLC48x5E8WzMjD6YHdP3mKN9QFVK7IhIgF9sutR9qJHAXMl8Hec/8HmuqbGydqukQ==",
+  "dgSpecHash": "UE1bxqqCX4dMPv410+6hqM1/UE1PsbSzACgQgYWD4mYXo0j6DJs+HlHfc2LvV04gryRHqgNsu+2glion87clCA==",
   "success": true,
-  "projectFilePath": "G:\\myProject\\vsvrsdk\\vsvrsdk\\DllProject\\Click_show_hideDemo\\Dll_Project\\Dll_Project.csproj",
+  "projectFilePath": "D:\\Unity Projects\\sina2\\sina2\\DllProject\\Click_show_hideDemo\\Dll_Project\\Dll_Project.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\000\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
-    "C:\\Users\\000\\.nuget\\packages\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512"
+    "C:\\Users\\amanu\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "C:\\Users\\amanu\\.nuget\\packages\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512"
   ],
   "logs": []
 }
