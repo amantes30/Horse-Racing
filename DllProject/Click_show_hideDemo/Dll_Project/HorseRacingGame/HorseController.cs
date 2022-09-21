@@ -213,9 +213,11 @@ namespace Dll_Project.HorseRacingGame
             if (numberOfPlayers == 1)
             {
                 mStaticThings.I.StartCoroutine(StartCountdown(15));
+                GameCanvas.GetChild(2).GetChild(0).DOScaleX(1, 0.2f);
             }
             else if (numberOfPlayers > 1)
             {
+                GameCanvas.GetChild(2).GetChild(0).DOScaleX(0, 0.2f);
                 GameCanvas.GetChild(1).Find("Timer").DOScaleX(0, 0.2f);
                 WsCChangeInfo i = new WsCChangeInfo()
                 {
