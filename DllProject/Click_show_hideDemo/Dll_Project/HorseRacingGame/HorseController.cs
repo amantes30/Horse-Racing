@@ -57,6 +57,7 @@ namespace Dll_Project.HorseRacingGame
         public int numberOfPlayers = 0;
         public int horseIndex = 0;
         public int Rank = 1;
+        public int timer;
 
         public override void Init()
         {
@@ -96,6 +97,59 @@ namespace Dll_Project.HorseRacingGame
             {
                 GameCanvas.GetChild(0).GetChild(0).DOScaleX(0, 0.2f);
             });
+            GameCanvas.GetChild(0).GetChild(0).Find("JoinGame").GetComponent<Button>().onClick.AddListener(() =>
+            {
+                GameCanvas.GetChild(0).GetChild(0).DOScaleX(0, 0.2f);
+
+                if (numberOfPlayers == 0) { hostID = userID; }
+
+                else if (numberOfPlayers > 10)
+                {
+                    GameCanvas.GetChild(0).GetChild(1).DOScaleX(0, 0.2f);
+                    GameCanvas.GetChild(0).GetChild(1).GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
+                    {
+                        GameCanvas.GetChild(0).GetChild(0).DOScaleX(1, 0.2f);
+                        GameCanvas.GetChild(0).GetChild(1).DOScaleX(0, 0.2f);
+                        WsCChangeInfo i = new WsCChangeInfo()
+                        {
+                            a = "NewUserConnect",
+                            b = userID,
+                        };
+                        MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), i);
+                    });
+                    GameCanvas.GetChild(0).GetChild(1).GetChild(3).GetComponent<Button>().onClick.AddListener(() =>
+                    {
+                        GameCanvas.GetChild(0).GetChild(0).DOScaleX(1, 0.2f);
+                        GameCanvas.GetChild(0).GetChild(1).DOScaleX(0, 0.2f);
+                        WsCChangeInfo i = new WsCChangeInfo()
+                        {
+                            a = "NewUserConnect",
+                            b = userID,
+                        };
+                        MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), i);
+                    });
+                    GameCanvas.GetChild(0).GetChild(1).GetChild(1).GetChild(0).GetComponent<Text>().text = numberOfPlayers.ToString();
+                    GameCanvas.GetChild(0).GetChild(1).GetChild(1).GetChild(1).GetComponent<Text>().text = 4.ToString();
+
+                }
+                else if (numberOfPlayers < 10)
+                {
+                    GameCanvas.GetChild(0).DOScaleX(0, 0.2f);
+                    GameCanvas.GetChild(1).DOScaleX(1, 0.2f);
+                    horseIndex = numberOfPlayers;
+                    numberOfPlayers++;
+                    WsCChangeInfo start = new WsCChangeInfo() 
+                    {
+                        a = "i start",
+                        b = numberOfPlayers.ToString(),
+                        c = userID,
+                        d = hostID,
+                        e = horseIndex.ToString(),
+                    };
+                    MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), start);
+                    selected = true;
+                }
+            });
             GameCanvas.GetChild(0).GetChild(1).DOScaleX(0, 0.2f);
             GameCanvas.GetChild(1).GetChild(0).DOScaleX(0, 0.2f);
         }
@@ -123,6 +177,27 @@ namespace Dll_Project.HorseRacingGame
             {
                 GameCanvas.GetChild(0).GetChild(0).DOScaleX(1, 0.2f);
             }
+        }
+        public IEnumerator StartCountdown(int _seconds)
+        {
+            timer = _seconds;
+            while (timer > 0)
+            {
+                WsCChangeInfo _info = new WsCChangeInfo() 
+                {
+                    a = "Timer",
+                    b = timer.ToString(),
+                };
+                MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), _info);
+                yield return new WaitForSeconds(1);
+
+                timer--;
+            }
+            if (numberOfPlayers == 1)
+            {
+                mStaticThings.I.StartCoroutine(StartCountdown(15));
+            }
+            
         }
     }
 }

@@ -18,6 +18,7 @@ namespace Dll_Project.HorseRacingGame
     public class HrsGameReciever : DllGenerateBase
     {
         private string HostID;
+        private Transform Canvas;
         public override void Init()
         {
         }
@@ -30,6 +31,7 @@ namespace Dll_Project.HorseRacingGame
 
         public override void Start()
         {
+            Canvas = BaseMono.ExtralDatas[0].Target;
         }
         public override void OnEnable()
         {
@@ -94,6 +96,28 @@ namespace Dll_Project.HorseRacingGame
                         }
                     }
                     break;
+                case "i start":                   
+                    HorseController.i.numberOfPlayers = int.Parse(wsCChangeInfo.b);                   
+                    HorseController.i.userID = wsCChangeInfo.c;
+                    HorseController.i.hostID = wsCChangeInfo.d;
+                    HostID = wsCChangeInfo.d;
+                    int index = int.Parse(wsCChangeInfo.e);
+                    mStaticThings.I.StartCoroutine(PrepareHorse(HorseController.i.HorsesParent.GetChild(index), 4));
+
+                    if (HostID == mStaticThings.I.mAvatarID)
+                    {
+                        HorseController.i.timer = 15;
+                        mStaticThings.I.StartCoroutine(HorseController.i.StartCountdown(HorseController.i.timer));
+                    }
+                    
+                    break;
+                case "Timer":
+                    if (HorseController.i.selected)
+                    {
+                        Text txt = Canvas.GetChild(0).Find("Timer").GetChild(1).GetComponent<Text>();
+                        txt.text = wsCChangeInfo.b;
+                    }
+                    break;
             }
         }
 
@@ -112,5 +136,11 @@ namespace Dll_Project.HorseRacingGame
             MessageDispatcher.SendMessageData(WsMessageType.SendMovingObj.ToString(), wsMovingObj);
         }
 
+        IEnumerator PrepareHorse(Transform tt, float _waittime)
+        {
+            tt.GetComponent<Animator>().SetInteger("Speed", 1);
+            yield return new WaitForSeconds(_waittime);
+            tt.GetComponent<Animator>().SetInteger("Speed", 0);
+        }
     }
 }
