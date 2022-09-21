@@ -75,7 +75,7 @@ namespace Dll_Project.HorseRacingGame
                             c = ws.b
                         };
                         MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), ws);
-                        for (int i = 0; i <= HorseController.i.numberOfPlayers; i++)
+                        for (int i = 0; i < HorseController.i.numberOfPlayers; i++)
                         {
                             SendPosition(HorseController.i.HorsesParent.GetChild(i), "s");
                         }
@@ -89,7 +89,7 @@ namespace Dll_Project.HorseRacingGame
                         HorseController.i.numberOfPlayers = _info.activeUsers;
                         HorseController.i.hostID = _info._hostID;
 
-                        for (int i = 0; i <= HorseController.i.numberOfPlayers; i++)
+                        for (int i = 0; i < HorseController.i.numberOfPlayers; i++)
                         {
                             Animator animator = HorseController.i.Doors[i].GetComponent<Animator>();
                             animator.SetTrigger("isOpen");
@@ -111,12 +111,32 @@ namespace Dll_Project.HorseRacingGame
                     }
                     
                     break;
+                case "istart":
+                    HorseController.i.started = true;
+                    for (int i = 0; i < HorseController.i.numberOfPlayers; i++)
+                    {
+                        Animator animator = HorseController.i.HorsesParent.GetChild(i).GetComponent<Animator>();
+                        animator.GetComponent<Animator>().SetInteger("Speed", 2);
+
+                    }
+                    break;
                 case "Timer":
                     if (HorseController.i.selected)
                     {
                         Text txt = Canvas.GetChild(1).Find("Timer").GetComponent<Text>();
                         txt.transform.DOScaleX(1, 0.2f);
                         txt.text = ws.b;
+                    }
+                    break;
+                case "accelerate":
+                    float speed = float.Parse(ws.c);
+                    if (ws.b == HostID)
+                    {
+                        for (int i = 0; i < HorseController.i.numberOfPlayers; i++)
+                        {
+                            HorseController.i.HorsesParent.GetChild(i).Translate(Vector3.forward * speed * Time.deltaTime);
+                            SendPosition(HorseController.i.HorsesParent.GetChild(i), "i");
+                        }
                     }
                     break;
             }

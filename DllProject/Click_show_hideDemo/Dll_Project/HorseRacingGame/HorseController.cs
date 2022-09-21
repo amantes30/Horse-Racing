@@ -58,6 +58,8 @@ namespace Dll_Project.HorseRacingGame
         public int horseIndex = 0;
         public int Rank = 1;
         public int timer;
+        public float speed;
+        public int touchCount;
 
         public override void Init()
         {
@@ -167,6 +169,20 @@ namespace Dll_Project.HorseRacingGame
 
         public override void Update()
         {
+            if (started && selected)
+            {
+                WsCChangeInfo inf = new WsCChangeInfo()
+                {
+                    a = "acclerate",
+                    b = userID,
+                    c = speed.ToString()
+                };MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), inf);
+                if (touchCount > 10)
+                {
+                    speed += 0.5f;
+                    touchCount = 0;
+                }
+            }
         }
         public override void OnTriggerEnter(Collider other)
         {
@@ -197,6 +213,17 @@ namespace Dll_Project.HorseRacingGame
             if (numberOfPlayers == 1)
             {
                 mStaticThings.I.StartCoroutine(StartCountdown(15));
+            }
+            else if (numberOfPlayers > 1)
+            {
+                GameCanvas.GetChild(1).Find("Timer").DOScaleX(0, 0.2f);
+                WsCChangeInfo i = new WsCChangeInfo()
+                {
+                    a = "istart",
+                    b= numberOfPlayers.ToString()
+
+                };
+                MessageDispatcher.SendMessageData(WsMessageType.SendCChangeObj.ToString(), i);
             }
             
         }
