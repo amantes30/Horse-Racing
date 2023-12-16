@@ -1,3 +1,5 @@
+# This project is not a Unity standalone project.
+In order to run this project you must first set up the [SDK](https://gitee.com/vswork_admin/vsvrsdk)
 # In *Unity* scene
 
   - The *horses* need to be *child object* of the *Table object*.
